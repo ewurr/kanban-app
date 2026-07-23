@@ -1,0 +1,61 @@
+.miniBoard {
+  display: block;
+  position: relative;
+  background-color: #C9A876;
+  background-image:
+    radial-gradient(circle, #B08E5E 1px, transparent 1px);
+  background-size: 14px 14px;
+
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 110px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  box-sizing: border-box;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.miniBoard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.miniPostIt {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.miniPostIt:nth-child(1) {
+  top: 16px;
+  left: 16px;
+  transform: rotate(-4deg);
+}
+
+.miniPostIt:nth-child(2) {
+  top: 16px;
+  left: 56px;
+  transform: rotate(3deg);
+}
+
+.miniPostIt:nth-child(3) {
+  top: 42px;
+  left: 36px;
+  transform: rotate(-2deg);
+}
+
+.name {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  right: 16px;
+  font-family: var(--font-hand);
+  font-size: 20px;
+  color: #2B2B2B;
+  background-color: rgba(255, 248, 237, 0.85);
+  padding: 4px 10px;
+  border-radius: 6px;
+}

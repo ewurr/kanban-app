@@ -1,0 +1,44 @@
+.folder {
+  display: block;
+  position: relative;
+  text-decoration: none;
+  margin-top: 20px;
+  transition: transform 0.15s ease;
+}
+
+.folder:hover {
+  transform: translateY(-3px);
+}
+
+.tab {
+  position: absolute;
+  top: -20px;
+  left: 28px;
+  width: 100px;
+  height: 28px;
+  background-color: #FFD98A;
+  border-radius: 10px 10px 0 0;
+}
+
+.body {
+  background-color: #FFE9B8;
+  border-radius: 6px 16px 16px 16px;
+  padding: 28px;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.1);
+  min-height: 130px;
+  box-sizing: border-box;
+}
+
+.name {
+  margin: 0 0 8px;
+  font-family: var(--font-hand);
+  font-size: 28px;
+  color: #4A3B1A;
+}
+
+.description {
+  margin: 0;
+  font-size: 14px;
+  color: #7A6741;
+  line-height: 1.4;
+}

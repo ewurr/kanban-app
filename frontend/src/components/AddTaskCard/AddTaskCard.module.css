@@ -1,0 +1,97 @@
+.closedCard {
+  width: 140px;
+  min-height: 90px;
+  background-color: transparent;
+  border: 2px dashed #C9A876;
+  border-radius: 2px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  color: #8A7355;
+  font-family: var(--font-body, sans-serif);
+  font-size: 12px;
+
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.closedCard:hover {
+  background-color: rgba(255, 217, 61, 0.15);
+  border-color: #A8843F;
+}
+
+.plus {
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.openCard {
+  width: 200px;
+  background-color: #FFFFFF;
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 7px 9px;
+  border-radius: 6px;
+  border: 1px solid #E8DFC8;
+  font-size: 13px;
+  font-family: var(--font-body, sans-serif);
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.textarea {
+  resize: none;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #6C63FF;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.saveButton {
+  flex: 1;
+  padding: 7px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4ECDC4;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  background-color: #C9C9C9;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #8A7355;
+  font-size: 12px;
+  cursor: pointer;
+}

@@ -1,0 +1,20 @@
+.corkBoard {
+  background-color: #C9A876;
+  background-image:
+    radial-gradient(circle, #B08E5E 1px, transparent 1px),
+    radial-gradient(circle, #D4B685 1px, transparent 1px);
+  background-size: 18px 18px, 24px 24px;
+  background-position: 0 0, 9px 9px;
+
+  padding: 32px;
+  border-radius: 16px;
+
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+
+  min-height: calc(100vh - 4rem);
+  box-sizing: border-box;
+}

@@ -1,0 +1,36 @@
+.card {
+  display: block;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stripe {
+  height: 12px;
+  width: 100%;
+}
+
+.body {
+  padding: 28px;
+}
+
+.name {
+  margin: 0 0 10px;
+  font-family: var(--font-hand);
+  font-size: 30px;
+  color: #2B2B2B;
+}
+
+.owner {
+  margin: 0;
+  font-size: 14px;
+  color: #888780;
+}

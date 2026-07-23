@@ -1,0 +1,143 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\TaskRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Column;
+use App\Entity\User;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+
+
+#[ORM\Entity(repositoryClass: TaskRepository::class)]
+class Task
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    #[Groups(['task:read'])]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['task:read'])]
+    #[Assert\NotBlank(message: 'Görev başlığı zorunludur.')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Başlık en az 2 karakter olmalıdır.')]
+    private ?string $title = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['task:read'])]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 50)]
+    #[Groups(['task:read'])]
+    #[Assert\Choice(choices: ['low', 'medium', 'high'], message: 'Öncelik low, medium veya high olmalıdır.')]
+    private ?string $priority = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['task:read'])]
+    private ?\DateTimeImmutable $dueDate = null;
+
+    #[ORM\Column]
+    #[Groups(['task:read'])]
+    private ?int $position = null;
+
+    #[ORM\ManyToOne(targetEntity: Column::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['task:read'])]
+    private ?Column $column = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['task:read'])]
+    private ?User $assignee = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): static
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getPriority(): ?string
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(string $priority): static
+    {
+        $this->priority = $priority;
+
+        return $this;
+    }
+
+    public function getDueDate(): ?\DateTimeImmutable
+    {
+        return $this->dueDate;
+    }
+
+    public function setDueDate(?\DateTimeImmutable $dueDate): static
+    {
+        $this->dueDate = $dueDate;
+
+        return $this;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): static
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function getColumn(): ?Column
+    {
+        return $this->column;
+    }
+
+    public function setColumn(Column $column): static
+    {
+        $this->column = $column;
+        return $this;
+    }
+
+    public function getAssignee(): ?User
+    {
+        return $this->assignee;
+    }
+
+    public function setAssignee(?User $assignee): static
+    {
+        $this->assignee = $assignee;
+
+        return $this;
+    }
+}
