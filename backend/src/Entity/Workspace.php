@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\WorkspaceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
+use App\Entity\WorkspaceMember;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use App\Entity\Project;
@@ -17,12 +18,12 @@ class Workspace
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['workspace:read', 'project:read'])]
+    #[Groups(['workspace:read', 'project:read', 'board:read'])]
     private ?int $id = null;
 
     public function __construct()
     {
-        $this->members = new ArrayCollection();
+        $this->workspaceMembers = new ArrayCollection();
         $this->projects = new ArrayCollection();
     }
 
@@ -32,13 +33,14 @@ class Workspace
     #[Assert\Length(min: 2, max: 255, minMessage: 'İsim en az 2 karakter olmalıdır.')]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['workspace:read'])]
-    private ?User $owner = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class)]
-    private Collection $members;
+    /**
+     * @var Collection<int, WorkspaceMember>
+     */
+    #[ORM\OneToMany(mappedBy:'workspace', targetEntity:WorkspaceMember::class)]  
+    #[Groups(['workspace:read'])]
+    private Collection $workspaceMembers;
+
 
     /**
      * @var Collection<int, Project>
@@ -63,41 +65,14 @@ class Workspace
         return $this;
     }
 
-    public function getOwner(): ?User 
-    {
-        return $this->owner;
-    }
-
-    public function setOwner(User $owner): static
-    {
-        $this->owner = $owner;
-        return $this;
-    }
-
     /**
-     * @return Collection<int, User>
+     * @return Collection<int, WorkspaceMember>
      */
-    public function getMembers() :Collection
+    public function getWorkspaceMembers(): Collection
     {
-        return $this->members;
+        return $this->workspaceMembers;
     }
-
-    public function addMember(User $member) : static
-    {
-        if(!$this->members->contains($member)){
-            $this->members->add($member);
-        }
-
-        return $this;
-    }
-
-    public function removeMember (User $member): static
-    {
-        $this->members->removeElement($member);
-
-        return $this;
-    }
-
+    
 
     /**
      * @return Collection<int, Project>

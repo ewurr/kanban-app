@@ -1,19 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../AuthContext'
 import { WorkspaceCard } from '../components/WorkspaceCard/WorkspaceCard'
+import type { Workspace } from '../types/kanban'
+import { AddWorkspaceCard } from '../components/AddWorkspaceCard/AddWorkspaceCard'
 
-
-interface Workspace {
-  id: number
-  name: string
-  owner: {
-    id: number
-    email: string
-  }
-}
 
 export function WorkspacesPage() {
-  const { token, logout } = useAuth()
+  const { token, user, logout } = useAuth()
 
   const { data, isLoading, error } = useQuery<Workspace[]>({
     queryKey: ['workspaces'],
@@ -46,14 +39,23 @@ export function WorkspacesPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-        {data?.map((workspace) => (
-          <WorkspaceCard
-            key={workspace.id}
-            id={workspace.id}
-            name={workspace.name}
-            ownerEmail={workspace.owner.email}
-          />
-        ))}
+            {data?.map((workspace) => {
+                const myMembership = workspace.workspaceMembers.find(
+                    (member) => member.user.id === user?.id
+                )
+                const isOwner = myMembership?.role === 'owner'
+
+                return (
+                    <WorkspaceCard
+                        key={workspace.id}
+                        id={workspace.id}
+                        name={workspace.name}
+                        memberCount={workspace.workspaceMembers.length}
+                        isOwner={isOwner}
+                    />
+                )
+            })}
+          <AddWorkspaceCard />
       </div>
     </div>
   )

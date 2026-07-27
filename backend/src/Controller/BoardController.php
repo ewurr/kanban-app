@@ -35,7 +35,7 @@ final class BoardController extends AbstractController
     #[Route('/{id}', name: 'app_board_show', methods: ['GET'])]
     public function show(Board $board, SerializerInterface $serializer): JsonResponse
     {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::VIEW, $board->getProject()->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_VIEW, $board);
 
         $json = $serializer->serialize($board, 'json', ['groups' => 'board:read']);
 
@@ -53,7 +53,7 @@ final class BoardController extends AbstractController
 
         $project = $entityManager->getRepository(Project::class)->find($data['projectId']);
 
-        $this->denyAccessUnlessGranted(WorkspaceVoter::EDIT, $project->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::BOARD_CREATE, $project);
 
         $board = new Board();
         $board->setName($data['name']);
@@ -100,7 +100,7 @@ final class BoardController extends AbstractController
         SerializerInterface $serializer,
         ValidatorInterface $validator
     ): JsonResponse {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::EDIT, $board->getProject()->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::BOARD_EDIT, $board);
 
         $data = json_decode($request->getContent(), true);
 
@@ -129,7 +129,7 @@ final class BoardController extends AbstractController
     #[Route('/{id}', name: 'app_board_delete', methods: ['DELETE'])]
     public function delete (Board $board, EntityManagerInterface $entityManager): JsonResponse
     {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::DELETE, $board->getProject()->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::BOARD_DELETE, $board);
 
         $entityManager->remove($board);
         $entityManager->flush();

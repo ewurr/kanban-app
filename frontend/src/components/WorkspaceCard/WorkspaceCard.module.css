@@ -29,8 +29,29 @@
   color: #2B2B2B;
 }
 
-.owner {
+.member {
   margin: 0;
   font-size: 14px;
   color: #888780;
+}
+
+.deleteButton {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #c0392b;
+  font-size: 12px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.deleteButton:hover {
+  background-color: rgba(192, 57, 43, 0.1);
+}
+
+.deleteButton:disabled {
+  color: #999;
+  cursor: not-allowed;
 }

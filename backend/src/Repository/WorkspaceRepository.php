@@ -48,11 +48,10 @@ class WorkspaceRepository extends ServiceEntityRepository
     public function findAllForUser(User $user): array
     {
         return $this->createQueryBuilder('w')
-            ->leftJoin('w.members', 'm')
-            ->where('w.owner = :user')
-            ->orWhere('m = :user')
-            ->setParameter('user', $user)
-            ->getQuery()
-            ->getResult();
+                ->join('w.workspaceMembers', 'wm')
+                ->where('wm.user = :user')
+                ->setParameter('user', $user)
+                ->getQuery()
+                ->getResult();
     }
 }

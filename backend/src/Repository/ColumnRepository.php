@@ -48,14 +48,13 @@ class ColumnRepository extends ServiceEntityRepository
     public function findAllForUser(User $user): array
     {
         return $this->createQueryBuilder('c')
-        ->join('c.board', 'b')
-        ->join('b.project', 'p')
-        ->join('p.workspace', 'w')
-        ->leftJoin('w.members', 'm')
-        ->where('w.owner = :user')
-        ->orWhere('m = :user')
-        ->setParameter('user', $user)
-        ->getQuery()
-        ->getResult();
+                ->join('c.board', 'b')
+                ->join('b.project', 'p')
+                ->join('p.workspace', 'w')
+                ->join('w.workspaceMembers', 'wm')
+                ->where('wm.user = :user')
+                ->setParameter('user', $user)
+                ->getQuery()
+                ->getResult();
     }
 }

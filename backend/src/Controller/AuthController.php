@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 
@@ -22,29 +23,44 @@ final class AuthController extends AbstractController
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
         SerializerInterface $serializer,
-        JWTTokenManagerInterface $jwtManager   // <-- eklendi
+        ValidatorInterface $validator,
+        JWTTokenManagerInterface $jwtManager
     ) : JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         // 1. email zaten kayıtlı mı kontrol
-        $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+        $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email'] ?? null]);
         if($existingUser !== null){
             return new JsonResponse(['error' => 'Bu email zaten kayıtlı'], 409);
         }
 
         // 2. yeni user oluştur
         $user = new User();
-        $user->setEmail($data['email']);
+        $user->setEmail($data['email'] ?? '');
+        $user->setName($data['name'] ?? '');
+        $user->setSurname($data['surname'] ?? '');
 
         // 3. şifreyi hashleyerek kaydet
-        $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
+        $hashedPassword = $passwordHasher->hashPassword($user, $data['password'] ?? '');
         $user->setPassword($hashedPassword);
+
+        // 4. validasyon
+        $errors = $validator->validate($user);
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+
+            return new JsonResponse(['errors' => $errorMessages], 400);
+        }
 
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // 4. token üret
+        // 5. token üret
         $token = $jwtManager->create($user);
 
         $json = $serializer->serialize($user, 'json', ['groups' => 'workspace:read']);
@@ -53,5 +69,14 @@ final class AuthController extends AbstractController
             'token' => $token,
             'user' => json_decode($json),
         ], 201);
+
     }
+
+        #[Route('/me', name: 'app_auth_me', methods:['GET'])]
+        public function me (SerializerInterface $serializer): JsonResponse
+        {
+            $json = $serializer->serialize($this->getUser(), 'json', ['groups' => 'workspace:read']);
+
+            return JsonResponse::fromJsonString($json);
+        }
 }

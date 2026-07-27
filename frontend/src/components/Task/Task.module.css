@@ -18,3 +18,27 @@
   color: #2B2B2B;
   line-height: 1.3;
 }
+
+.assignees {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.assigneeChip {
+  font-size: 11px;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #2B2B2B;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-family: var(--font-body, sans-serif);
+}
+
+.descriptionPreview {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #555;
+  font-family: var(--font-body, sans-serif);
+  line-height: 1.3;
+}

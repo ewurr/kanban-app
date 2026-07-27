@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ColumnRepository::class)]
 #[ORM\Table(name: '`column`')]
+
 class Column
 {
     #[ORM\Id]
@@ -36,7 +37,7 @@ class Column
     private ?int $position = null;
 
     #[ORM\ManyToOne(targetEntity: Board::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete:'CASCADE')]
     #[Groups(['column:read'])]
     private ?Board $board = null;
 

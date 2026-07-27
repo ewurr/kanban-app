@@ -6,13 +6,14 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -23,12 +24,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->ownedWorkspaces = new ArrayCollection();
+
     }
 
     #[ORM\Column(length: 180)]
     #[Groups(['workspace:read', 'task:read'])]
     private ?string $email = null;
+
+    #[ORM\Column(length: 100)]
+    #[Groups(['workspace:read', 'task:read'])]
+    #[Assert\NotBlank(message: 'The name field is required.')]
+    private ?string $name = null;
+
+    #[ORM\Column(length: 100)]
+    #[Groups(['workspace:read', 'task:read'])]
+    #[Assert\NotBlank(message: 'The surname field is required.')]
+    private ?string $surname = null;
 
     /**
      * @var list<string> The user roles
@@ -42,11 +53,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    /**
-     * @var Collection<int, Workspace>
-     */
-    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Workspace::class)]
-    private Collection $ownedWorkspaces;
 
     public function getId(): ?int
     {
@@ -61,6 +67,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getSurname(): ?string
+    {
+        return $this->surname;
+    }
+
+    public function setSurname(string $surname): static
+    {
+        $this->surname = $surname;
 
         return $this;
     }
@@ -110,14 +140,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->password = $password;
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, Workspace>
-     */
-    public function getOwnedWorkspaces(): Collection
-    {
-        return $this->ownedWorkspaces;
     }
 
     /**

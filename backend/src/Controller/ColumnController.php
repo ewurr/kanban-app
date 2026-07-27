@@ -32,7 +32,7 @@ final class ColumnController extends AbstractController
     #[Route('/{id}', name: 'app_column_show', methods: ['GET'])]
     public function show(Column $column, SerializerInterface $serializer): JsonResponse
     {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::VIEW, $column->getBoard()->getProject()->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_VIEW, $column);
         
         $json = $serializer->serialize($column, 'json', ['groups' =>'column:read']);
 
@@ -50,7 +50,7 @@ final class ColumnController extends AbstractController
 
         $board = $entityManager->getRepository(Board::class)->find($data['boardId']);
 
-        $this->denyAccessUnlessGranted(WorkspaceVoter::EDIT, $board->getProject()->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::COLUMN_CREATE, $board);
 
         $column = new Column();
         $column->setName($data['name']);
@@ -85,7 +85,7 @@ final class ColumnController extends AbstractController
         SerializerInterface $serializer,
         ValidatorInterface $validator
     ): JsonResponse {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::EDIT, $column->getBoard()->getProject()->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::COLUMN_EDIT, $column);
 
 
         $data = json_decode($request->getContent(), true);
@@ -114,7 +114,7 @@ final class ColumnController extends AbstractController
 
     #[Route('/{id}', name: 'app_column_delete', methods: ['DELETE'])]
     public function delete(Column $column, EntityManagerInterface $entityManager){
-        $this->denyAccessUnlessGranted(WorkspaceVoter::DELETE, $column->getBoard()->getProject()->getWorkspace());
+        $this->denyAccessUnlessGranted(WorkspaceVoter::COLUMN_DELETE, $column);
     
         $entityManager->remove($column);
         $entityManager->flush();

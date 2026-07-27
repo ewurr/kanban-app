@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TaskRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Column;
@@ -19,6 +21,12 @@ class Task
     #[ORM\Column]
     #[Groups(['task:read'])]
     private ?int $id = null;
+
+    public function __construct()
+    {
+        $this->assignments = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     #[ORM\Column(length: 255)]
     #[Groups(['task:read'])]
@@ -41,17 +49,23 @@ class Task
 
     #[ORM\Column]
     #[Groups(['task:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column]
+    #[Groups(['task:read'])]
     private ?int $position = null;
 
     #[ORM\ManyToOne(targetEntity: Column::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete:'CASCADE')]
     #[Groups(['task:read'])]
     private ?Column $column = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    /**
+     * @var Collection<int, TaskAssignment>
+     */
+    #[ORM\OneToMany(mappedBy: 'task', targetEntity: TaskAssignment::class)]
     #[Groups(['task:read'])]
-    private ?User $assignee = null;
+    private Collection $assignments;
 
     public function getId(): ?int
     {
@@ -106,6 +120,12 @@ class Task
         return $this;
     }
 
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+
     public function getPosition(): ?int
     {
         return $this->position;
@@ -129,15 +149,11 @@ class Task
         return $this;
     }
 
-    public function getAssignee(): ?User
+    /**
+     * @return Collection<int, TaskAssignment>
+     */
+    public function getAssignments(): Collection
     {
-        return $this->assignee;
-    }
-
-    public function setAssignee(?User $assignee): static
-    {
-        $this->assignee = $assignee;
-
-        return $this;
+        return $this->assignments;
     }
 }

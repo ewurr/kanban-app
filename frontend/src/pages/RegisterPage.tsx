@@ -7,6 +7,8 @@ export function RegisterPage(){
     const[email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
+    const [name, setName] = useState('')
+    const [surname, setSurname] = useState('')
     const navigate = useNavigate()
     const { login } = useAuth()
 
@@ -18,16 +20,16 @@ export function RegisterPage(){
             const response = await fetch ('http://localhost:8000/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password, name, surname }),
             })
 
             const data = await response.json()
 
             if(!response.ok) {
-                throw new Error(data.error ?? 'Kayıt sırasında bir hata oluştu')
+                throw new Error(data.error ?? 'An error occurred during registration.')
             }
             
-            login(data.token)
+            login(data.token, data.user)
             navigate('/')
         } catch (err) {
             if (err instanceof Error) {
@@ -55,11 +57,31 @@ export function RegisterPage(){
                     </div>
 
                     <div className={styles.field}>
-                        <label className={styles.label}>Şifre</label>
+                        <label className={styles.label}>Password</label>
                         <input
                             type="password" 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            className={styles.input}
+                        />
+                    </div>
+
+                    <div className={styles.field}>
+                        <label className={styles.label}>Name</label>
+                        <input  
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className={styles.input}
+                        />
+                    </div>
+
+                    <div className={styles.field}>
+                        <label className={styles.label}>Surname</label>
+                        <input  
+                            type="text"
+                            value={surname}
+                            onChange={(e) => setSurname(e.target.value)}
                             className={styles.input}
                         />
                     </div>

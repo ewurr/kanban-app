@@ -1,8 +1,16 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
+interface User {
+    id: number
+    email: string
+    name: string
+    surname: string 
+}
+
 interface AuthContextType {
     token: string | null
-    login: (token: string) => void
+    user: User | null
+    login: (token: string, user: User) => void
     logout: () => void
 }
 
@@ -14,18 +22,27 @@ export function AuthProvider({children} : {children: ReactNode}){
         localStorage.getItem('token')
     )
 
-    const login = (newToken: string) => {
+    const [user, setUser] = useState<User | null>(() => {
+        const stored = localStorage.getItem('user')
+        return stored ? JSON.parse(stored) : null
+    })
+
+    const login = (newToken: string, newUser: User) => {
         localStorage.setItem('token', newToken)
+        localStorage.setItem('user', JSON.stringify(newUser))
         setToken(newToken)
+        setUser(newUser)
     }
 
     const logout = () => {
         localStorage.removeItem('token')
+        localStorage.removeItem('user')
         setToken(null)
+        setUser(null)
     }
 
     return (
-        <AuthContext.Provider value={{token, login, logout}}>
+        <AuthContext.Provider value={{token, user, login, logout}}>
             {children}
         </AuthContext.Provider>
     )

@@ -47,12 +47,12 @@ class ProjectRepository extends ServiceEntityRepository
     public function findAllForUser(User $user): array
     {
         return $this->createQueryBuilder('p')
-        ->join('p.workspace', 'w')
-        ->leftJoin('w.members', 'm')
-        ->where('w.owner = :user')
-        ->orWhere('m = :user')
-        ->setParameter('user', $user)
-        ->getQuery()
-        ->getResult();
+                ->join('p.workspace', 'w')
+                ->join('w.workspaceMembers', 'wm')
+                ->where('wm.user = :user')
+                ->setParameter('user', $user)
+                ->getQuery()
+                ->getResult();
+
     }
 }

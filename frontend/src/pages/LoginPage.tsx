@@ -26,7 +26,13 @@ export function LoginPage() {
       }
 
       const data = await response.json()
-      login(data.token)
+
+      const meResponse = await fetch('http://localhost:8000/api/me', {
+        headers: { Authorization: `Bearer ${data.token}` },
+      })
+      const user = await meResponse.json()
+
+      login(data.token, user)
       navigate('/')
       
     } catch (err) {

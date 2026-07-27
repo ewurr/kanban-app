@@ -1,14 +1,9 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../AuthContext'
-import styles from './AddColumnCard.module.css'
+import styles from './AddWorkspaceCard.module.css'
 
-interface AddColumnCardProps {
-  boardId: number
-  nextPosition: number
-}
-
-export function AddColumnCard({ boardId, nextPosition }: AddColumnCardProps) {
+export function AddWorkspaceCard() {
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState('')
   const { token } = useAuth()
@@ -16,24 +11,19 @@ export function AddColumnCard({ boardId, nextPosition }: AddColumnCardProps) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('http://localhost:8000/api/columns', {
+      const response = await fetch('http://localhost:8000/api/workspaces', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          boardId,
-          name,
-          position: nextPosition,
-        }),
+        body: JSON.stringify({ name }),
       })
-      if (!response.ok) throw new Error('Column oluşturulamadı')
+      if (!response.ok) throw new Error('Workspace oluşturulamadı')
       return response.json()
     },
-    
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['columns'] })
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] })
       setName('')
       setIsOpen(false)
     },
@@ -43,7 +33,7 @@ export function AddColumnCard({ boardId, nextPosition }: AddColumnCardProps) {
     return (
       <button className={styles.closedCard} onClick={() => setIsOpen(true)}>
         <span className={styles.plus}>+</span>
-        <span>Column ekle</span>
+        <span>Workspace ekle</span>
       </button>
     )
   }
@@ -54,10 +44,11 @@ export function AddColumnCard({ boardId, nextPosition }: AddColumnCardProps) {
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Column adı"
+        placeholder="Workspace adı"
         className={styles.input}
         autoFocus
       />
+
       <div className={styles.action}>
         <button
           onClick={() => mutation.mutate()}
@@ -66,6 +57,7 @@ export function AddColumnCard({ boardId, nextPosition }: AddColumnCardProps) {
         >
           {mutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
+
         <button onClick={() => setIsOpen(false)} className={styles.cancelButton}>
           İptal
         </button>

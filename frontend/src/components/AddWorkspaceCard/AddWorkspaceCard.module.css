@@ -1,9 +1,9 @@
 .closedCard {
   min-width: 220px;
-  min-height: 120px;
+  min-height: 100px;
   background-color: transparent;
   border: 2px dashed #B08E5E;
-  border-radius: 4px;
+  border-radius: 8px;
 
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@
   min-width: 220px;
   background-color: #FFF8ED;
   padding: 16px;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.2);
 }
 

@@ -31,7 +31,7 @@ class Board
     private ?string $name = null;
 
     #[ORM\ManyToOne(targetEntity: Project::class)]
-    #[ORM\JoinColumn(nullable:false)]
+    #[ORM\JoinColumn(nullable:false, onDelete:'CASCADE')]
     #[Groups(['board:read'])]
     private ?Project $project=null;
 

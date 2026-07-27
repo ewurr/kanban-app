@@ -25,7 +25,7 @@
   border-radius: 6px 16px 16px 16px;
   padding: 28px;
   box-shadow: 0 5px 16px rgba(0, 0, 0, 0.1);
-  min-height: 130px;
+  min-height: 180px;
   box-sizing: border-box;
 }
 
@@ -41,4 +41,86 @@
   font-size: 14px;
   color: #7A6741;
   line-height: 1.4;
+}
+
+.cardActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.editButton, .deleteButton {
+  border: none;
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.editButton {
+  color: #4A3B1A;
+}
+
+.editButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.deleteButton {
+  color: #c0392b;
+}
+
+.deleteButton:hover {
+  background-color: rgba(192, 57, 43, 0.1);
+}
+
+.deleteButton:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+.editInput {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #E8DFC8;
+  font-size: 18px;
+  font-family: var(--font-hand, sans-serif);
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: #6C63FF;
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+}
+
+.saveButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4ECDC4;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  background-color: #C9C9C9;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #4A3B1A;
+  font-size: 12px;
+  cursor: pointer;
 }

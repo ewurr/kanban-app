@@ -13,9 +13,16 @@ interface Board {
     }
 }
 
+interface Project {
+    id: number
+    workspace: {
+        id: number
+    }
+}
+
 export function BoardsPage(){
     const { id } = useParams()
-    const { token } = useAuth()
+    const { token, user } = useAuth()
     
     const {data, isLoading, error} = useQuery<Board[]>({
         queryKey: ['boards', id],
@@ -29,10 +36,37 @@ export function BoardsPage(){
         },
     })
 
+    const { data: project } = useQuery<Project>({
+        queryKey: ['project', id],
+        queryFn: async () => {
+            const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!response.ok) throw new Error(`HTTP ${response.status}`)
+            return response.json()
+        },
+    })
+
+    const { data: workspace } = useQuery<{ workspaceMembers: { user: { id: number }; role: string }[] }>({
+        queryKey: ['workspace', project?.workspace.id],
+        enabled: !!project,
+        queryFn: async () => {
+            const response = await fetch(`http://localhost:8000/api/workspaces/${project?.workspace.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!response.ok) throw new Error(`HTTP ${response.status}`)
+            return response.json()
+        },
+    })
+
     if (isLoading) return <p>Yükleniyor...</p>
     if(error) return <p>Hata: {error.message}</p>
 
     const filteredBoards = data?.filter((board) => board.project.id === Number(id))
+    const myMembership = workspace?.workspaceMembers.find((m) => m.user.id === user?.id)
+    const canManage = myMembership?.role === 'owner' || myMembership?.role === 'pm'
+
+    console.log('project:', project, 'workspace:', workspace, 'myMembership:', myMembership, 'canManage:', canManage)
 
     return (
         <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
@@ -40,7 +74,7 @@ export function BoardsPage(){
                 <h1 style={{ fontFamily: 'var(--font-hand)', fontSize: '36px', marginBottom: '2rem' }}>Boards</h1>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '24px' }}>
                     {filteredBoards?.map((board) => (
-                        <BoardCard key={board.id} id={board.id} name={board.name} />
+                        <BoardCard key={board.id} id={board.id} name={board.name} canManage={canManage} />
                     ))}
                 </div>
             </div>

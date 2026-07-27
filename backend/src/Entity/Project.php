@@ -38,9 +38,9 @@ class Project
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: Workspace::class)]
-    #[ORM\JoinColumn(nullable:false)]
-    #[Groups(['project:read'])]
-    private ?Workspace $workspace=null;
+    #[ORM\JoinColumn(nullable:false, onDelete:'CASCADE')]
+    #[Groups(['project:read', 'board:read'])]
+    private ?Workspace $workspace = null;
 
 
     /**

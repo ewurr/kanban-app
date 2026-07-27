@@ -11,6 +11,8 @@ use App\Entity\Workspace;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\User;
+use App\Entity\WorkspaceMember;
+use App\Enum\WorkspaceRole;
 use App\Security\Voter\WorkspaceVoter;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -30,7 +32,7 @@ final class WorkspaceController extends AbstractController
     #[Route('/{id}', name: 'app_workspace_show', methods: ['GET'])]
     public function show (Workspace $workspace, SerializerInterface $serializer): JsonResponse
     {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::VIEW, $workspace);
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_VIEW, $workspace);
 
         $json = $serializer->serialize($workspace, 'json', ['groups'=> 'workspace:read']);
         
@@ -48,7 +50,6 @@ final class WorkspaceController extends AbstractController
 
         $workspace = new Workspace();
         $workspace->setName($data['name'] ?? '');
-        $workspace->setOwner($this->getUser());
 
         $errors = $validator->validate($workspace);
 
@@ -63,6 +64,15 @@ final class WorkspaceController extends AbstractController
 
 
         $entityManager->persist($workspace);
+
+        $ownerMembership = new WorkspaceMember();
+        $ownerMembership->setWorkspace($workspace);
+        $ownerMembership->setUser($this->getUser());
+        $ownerMembership->setRole(WorkspaceRole::OWNER);
+
+        $workspace->getWorkspaceMembers()->add($ownerMembership);
+
+        $entityManager->persist($ownerMembership);
         $entityManager->flush();
 
         $json = $serializer->serialize($workspace, 'json', ['groups' => 'workspace:read']);
@@ -79,7 +89,7 @@ final class WorkspaceController extends AbstractController
         ValidatorInterface $validator
     ) : JsonResponse {
 
-        $this->denyAccessUnlessGranted(WorkspaceVoter::EDIT, $workspace);
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_EDIT, $workspace);
 
         $data = json_decode($request->getContent(), true);
 
@@ -113,17 +123,35 @@ final class WorkspaceController extends AbstractController
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer
     ): JsonResponse {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::EDIT, $workspace);
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_MANAGE_MEMBERS, $workspace);
 
         $data = json_decode($request->getContent(), true);
 
-        $user = $entityManager->getRepository(User::class)->find($data['userId'] ?? null);
+        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email'] ?? null]);
 
         if($user === null) {
-            return new JsonResponse(['error' => 'Kullanıcı bulunamadı'], 404);
+            return new JsonResponse(['error' => 'User not found'], 404);
         }
 
-        $workspace->addMember($user);
+        $role = WorkspaceRole::tryFrom($data['role'] ?? '');
+        
+        if($role === null){
+            return new JsonResponse(['error' => 'Invalid Role. Must be Owner, PM or Worker.']);
+        }
+
+        $existingMembership = $entityManager->getRepository(WorkspaceMember::class)
+            ->findOneByWorkspaceAndUser($workspace, $user);
+
+        if ($existingMembership !== null) {
+            return new JsonResponse(['error' => 'This user is already a member of workspace.'], 409);
+        }
+
+        $membership = new WorkspaceMember();
+        $membership->setWorkspace($workspace);
+        $membership->setUser($user);
+        $membership->setRole($role);
+
+        $entityManager->persist($membership);
         $entityManager->flush();
 
         $json = $serializer->serialize($workspace, 'json', ['groups' => 'workspace:read']);
@@ -134,15 +162,12 @@ final class WorkspaceController extends AbstractController
     #[Route('/{id}', name: 'app_workspace_delete', methods: ['DELETE'])]
     public function delete (Workspace $workspace, EntityManagerInterface $entityManager): JsonResponse
     {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::DELETE, $workspace);
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_DELETE, $workspace);
 
         $entityManager->remove($workspace);
         $entityManager->flush();
 
         return new JsonResponse(null, 204);
     }
-
-
-    
 
 }
