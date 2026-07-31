@@ -1,0 +1,82 @@
+.overlay {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 400;
+}
+
+.panel {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  bottom: 0;
+  width: 260px;
+  background-color: white;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.homeLink {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  color: #2B2B2B;
+  text-decoration: none;
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.homeLink:hover {
+  background-color: #e0e0e0;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  color: #888;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemLink {
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #2B2B2B;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.itemLink:hover {
+  background-color: #f5f5f5;
+}
+
+.taskItem {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: #f7f7f7;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.taskColumn {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.taskTitle {
+  font-size: 14px;
+  color: #2B2B2B;
+}

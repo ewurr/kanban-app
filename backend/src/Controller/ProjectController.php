@@ -94,6 +94,10 @@ final class ProjectController extends AbstractController
             $project->setName($data['name']);
         }
 
+        if(array_key_exists('description', $data)){
+            $project->setDescription($data['description']);
+        }
+
         $errors = $validator->validate($project);
 
         if(count($errors) > 0){

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../AuthContext'
-import type { Task as TaskType, Workspace as WorkspaceType } from '../../types/kanban'
+import type { Task as TaskType, Workspace as WorkspaceType, Column as ColumnType } from '../../types/kanban'
 import styles from './TaskDetailModal.module.css'
 
 interface TaskDetailModalProps {
@@ -18,6 +18,8 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
   const [editedTitle, setEditedTitle] = useState(task.title)
   const [editedDescription, setEditedDescription] = useState(task.description ?? '')
   const [editedPriority, setEditedPriority] = useState(task.priority)
+  const [editedDueDate, setEditedDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 10) : '')
+  const [editedColumnId, setEditedColumnId] = useState(task.column.id)
 
   const { data: workspace } = useQuery<WorkspaceType>({
     queryKey: ['workspace', workspaceId],
@@ -29,6 +31,31 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
       return response.json()
     },
   })
+
+  const { data: currentColumn } = useQuery<ColumnType>({
+    queryKey: ['column', task.column.id],
+    queryFn: async () => {
+      const response = await fetch(`http://localhost:8000/api/columns/${task.column.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      return response.json()
+    },
+  })
+
+  const { data: allColumns } = useQuery<ColumnType[]>({
+    queryKey: ['columns'],
+    enabled: !!currentColumn,
+    queryFn: async () => {
+      const response = await fetch('http://localhost:8000/api/columns', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      return response.json()
+    },
+  })
+
+  const columnsInSameBoard = allColumns?.filter((c) => c.board.id === currentColumn?.board.id) ?? []
 
   const addAssigneeMutation = useMutation({
     mutationFn: async (userId: number) => {
@@ -74,6 +101,8 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
           title: editedTitle,
           description: editedDescription || null,
           priority: editedPriority,
+          dueDate: editedDueDate || null,
+          columnId: editedColumnId,
         }),
       })
       if (!response.ok) throw new Error('Task güncellenemedi')
@@ -110,12 +139,14 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
     (member) => !assignedUserIds.includes(member.user.id)
   ) ?? []
 
+  const today = new Date().toISOString().slice(0, 10)
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>×</button>
 
-        {isEditing ? (
+        {isEditing ? ( 
           <div className={styles.editForm}>
             <input
               type="text"
@@ -142,6 +173,26 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
               <option value="high">High</option>
             </select>
 
+            <label className={styles.fieldLabel}>Bitiş tarihi</label>
+            <input
+              type="date"
+              value={editedDueDate}
+              min={today}
+              onChange={(e) => setEditedDueDate(e.target.value)}
+              className={styles.editInput}
+            />
+
+            <label className={styles.fieldLabel}>Column</label>
+            <select
+              value={editedColumnId}
+              onChange={(e) => setEditedColumnId(Number(e.target.value))}
+              className={styles.select}
+            >
+              {columnsInSameBoard.map((col) => (
+                <option key={col.id} value={col.id}>{col.name}</option>
+              ))}
+            </select>
+
             <div className={styles.editActions}>
               <button
                 onClick={() => updateMutation.mutate()}
@@ -150,7 +201,7 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
               >
                 Kaydet
               </button>
-              <button onClick={() => setIsEditing(false)} className={styles.cancelButton}>
+              <button onClick={() => setIsEditing(false)} className={styles.cancelButton} disabled={updateMutation.isPending}>
                 İptal
               </button>
             </div>
@@ -163,7 +214,14 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
 
             <div className={styles.metaRow}>
               <span className={styles.metaItem}>Öncelik: {task.priority}</span>
-              {task.dueDate && <span className={styles.metaItem}>Bitiş: {task.dueDate}</span>}
+              {task.dueDate && (
+                <span className={styles.metaItem}>
+                  Bitiş: {new Date(task.dueDate).toLocaleDateString('tr-TR')}
+                </span>
+              )}
+              {currentColumn && (
+                <span className={styles.metaItem}>Column: {currentColumn.name}</span>
+              )}
             </div>
 
             <div className={styles.taskActions}>
@@ -171,6 +229,8 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
                 setEditedTitle(task.title)
                 setEditedDescription(task.description ?? '')
                 setEditedPriority(task.priority)
+                setEditedDueDate(task.dueDate ? task.dueDate.slice(0, 10) : '')
+                setEditedColumnId(task.column.id)
                 setIsEditing(true)
               }}>
                 Düzenle
@@ -191,7 +251,7 @@ export function TaskDetailModal({ task, workspaceId, onClose }: TaskDetailModalP
               <button
                 className={styles.removeButton}
                 onClick={() => removeAssigneeMutation.mutate(assignment.user.id)}
-                disabled={removeAssigneeMutation.isPending}
+                disabled={removeAssigneeMutation.isPending || updateMutation.isPending || deleteMutation.isPending}
               >
                 Çıkar
               </button>

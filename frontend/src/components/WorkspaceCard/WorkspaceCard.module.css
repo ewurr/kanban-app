@@ -36,15 +36,29 @@
 }
 
 .deleteButton {
-  margin-top: 8px;
-  padding: 4px 10px;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 6px;
-  background-color: transparent;
-  color: #c0392b;
-  font-size: 12px;
+  border-radius: 8px;
   cursor: pointer;
-  align-self: flex-start;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(192, 57, 43, 0.1);
+  color: #c0392b;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  margin-top: 8px;
+}
+
+.deleteButton:hover:not(:disabled) {
+  background-color: rgba(192, 57, 43, 0.18);
+  transform: scale(1.05);
+}
+
+.deleteButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .deleteButton:hover {

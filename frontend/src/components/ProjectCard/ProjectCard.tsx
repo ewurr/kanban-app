@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from "react-router-dom";
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../AuthContext'
+import { EditProjectModal } from '../EditProjectModal/EditProjectModal'
 import styles from './ProjectCard.module.css'
 
 interface ProjectCardProps {
@@ -11,31 +12,29 @@ interface ProjectCardProps {
     isOwner: boolean
 }
 
+interface BoardSummary {
+    id: number
+    project: {id: number}
+}
+
 export function ProjectCard({ id, name, description, isOwner }: ProjectCardProps) {
-    const [isEditing, setIsEditing] = useState(false)
-    const [editedName, setEditedName] = useState(name)
+    const [isModalOpen, setIsModalOpen] = useState(false)
     const { token } = useAuth()
     const queryClient = useQueryClient()
 
-    const updateMutation = useMutation({
-        mutationFn: async () => {
-            const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name: editedName }),
+    const {data: boards} = useQuery<BoardSummary[]>({
+        queryKey: ['boards-all'],
+        queryFn: async () => {
+            const response = await fetch('http://localhost:8000/api/boards', {
+                headers: { Authorization: `Bearer ${token}` },
             })
-            if (!response.ok) throw new Error('Proje güncellenemedi')
+            if (!response.ok) throw new Error(`HTTP ${response.status}`)
             return response.json()
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['projects'] })
-            setIsEditing(false)
         },
     })
 
+    const firstBoard = boards?.filter((b) => b.project.id === id)[0]    
+    const linkTo = firstBoard ? `/boards/${firstBoard.id}` : `/projects/${id}`
     const deleteMutation = useMutation({
         mutationFn: async () => {
             const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
@@ -63,54 +62,44 @@ export function ProjectCard({ id, name, description, isOwner }: ProjectCardProps
 
     const handleEditStart = (event: React.MouseEvent) => {
         stop(event)
-        setEditedName(name)
-        setIsEditing(true)
-    }
-
-    if (isEditing) {
-        return (
-            <div className={styles.folder}>
-                <div className={styles.tab} />
-                <div className={styles.body}>
-                    <input
-                        type="text"
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        className={styles.editInput}
-                        autoFocus
-                        onClick={stop}
-                    />
-                    <div className={styles.editActions}>
-                        <button
-                            onClick={(e) => { stop(e); updateMutation.mutate() }}
-                            disabled={!editedName.trim() || updateMutation.isPending}
-                            className={styles.saveButton}
-                        >
-                            Kaydet
-                        </button>
-                        <button onClick={(e) => { stop(e); setIsEditing(false) }} className={styles.cancelButton}>
-                            İptal
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
+        setIsModalOpen(true)
     }
 
     return(
-        <Link to={`/projects/${id}`} className={styles.folder}>
-            <div className={styles.tab} />
-            <div className={styles.body}>
-                <h3 className={styles.name}>{name}</h3>
-                {description && <p className={styles.description}>{description}</p>}
-
-                {isOwner && (
-                    <div className={styles.cardActions}>
-                        <button className={styles.editButton} onClick={handleEditStart}>Düzenle</button>
-                        <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending}>Sil</button>
-                    </div>
+        <>
+            <Link to={linkTo} className={styles.folder}>
+                <div className={styles.tab} />
+                <div className={styles.body}>
+                <h3 className={styles.name}>
+                    {name.length > 20 ? `${name.slice(0, 30)}...` : name}
+                </h3>
+                {description && (
+                <p className={styles.description}>
+                    {description.length > 80 ? `${description.slice(0, 80)}...` : description}
+                </p>
                 )}
-            </div>
-        </Link>
+
+                    {isOwner && (
+                        <div className={styles.cardActions}>
+                            <button className={styles.editButton} onClick={handleEditStart} title="Düzenle">
+                                ✎
+                            </button>
+                            <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending}>
+                                🗑
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </Link>
+
+            {isModalOpen && (
+                <EditProjectModal
+                    id={id}
+                    name={name}
+                    description={description}
+                    onClose={() => setIsModalOpen(false)}
+                />
+            )}
+        </>
     )
 }

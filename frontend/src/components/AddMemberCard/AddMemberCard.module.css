@@ -91,3 +91,57 @@
   font-size: 13px;
   cursor: pointer;
 }
+
+.sectionTitle {
+  font-size: 13px;
+  color: #6B5A3E;
+  margin: 16px 0 8px 0;
+}
+
+.memberList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f7f7f7;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.memberName {
+  flex: 1;
+  font-size: 13px;
+  color: #2B2B2B;
+}
+
+.roleSelect {
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.roleSelect:disabled {
+  background-color: #eee;
+  color: #999;
+}
+
+.removeButton {
+  border: none;
+  background: none;
+  color: #c0392b;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.removeButton:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}

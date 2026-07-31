@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import styles from './LoginPage.module.css'
 
@@ -46,8 +46,8 @@ export function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.logo}>K</div>
-        <h1 className={styles.title}>Tekrar hoş geldin</h1>
-        <p className={styles.subtitle}>Panolarına devam etmek için giriş yap</p>
+        <h1 className={styles.title}>Hoş Geldin</h1>
+        <p className={styles.subtitle}>Panolarına Devam Etmek İçin Giriş Yap</p>
 
         <form onSubmit={handleSubmit}>
           <div className={styles.field}>
@@ -76,6 +76,10 @@ export function LoginPage() {
             Giriş yap
           </button>
         </form>
+
+        <p className={styles.subtitle} style={{ marginTop: '20px', marginBottom: 0 }}>
+          Hesabın hala yok mu? <Link to="/register">Kayıt ol</Link>
+        </p>
       </div>
     </div>
   )

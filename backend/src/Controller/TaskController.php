@@ -139,7 +139,7 @@ final class TaskController extends AbstractController
         return JsonResponse::fromJsonString($json);
     }
 
-    #[Route('/{id}/assignees', name: 'app_task_add_assşgnee', methods: ['POST'])]
+    #[Route('/{id}/assignees', name: 'app_task_add_assignee', methods: ['POST'])]
     public function addAssignee(
         Task $task,
         Request $request,
@@ -177,7 +177,7 @@ final class TaskController extends AbstractController
         return JsonResponse::fromJsonString($json, 201);
     }
 
-    #[Route('/{id}/assignees/{userId}', name: 'app_task_remove_assşgnee', methods: ['DELETE'])]
+    #[Route('/{id}/assignees/{userId}', name: 'app_task_remove_assignee', methods: ['DELETE'])]
     public function removeAssignee(
         Task $task,
         int $userId,

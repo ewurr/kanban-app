@@ -51,7 +51,7 @@ export function WorkspaceCard({ id, name, memberCount, isOwner }: WorkspaceCardP
                         onClick={handleDelete}
                         disabled={deleteMutation.isPending}
                     >
-                        Sil
+                        🗑
                     </button>
                 )}
             </div>

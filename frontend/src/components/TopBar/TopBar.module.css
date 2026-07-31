@@ -1,0 +1,90 @@
+.topBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background-color: #2B2B2B;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 20px;
+  z-index: 500;
+  box-sizing: border-box;
+}
+
+.hamburger {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.breadcrumb {
+  flex: 1;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.breadcrumbSeparator {
+  margin: 0 4px;
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userName {
+  font-size: 14px;
+  font-family: var(--font-hand, sans-serif);
+}
+
+.logoutButton {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4a4a4a;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  background-color: #5a5a5a;
+}
+
+.breadcrumbLink {
+  color: white;
+  font-size: 20px;
+  font-family: var(--font-hand, sans-serif);
+  text-decoration: none;
+}
+
+.breadcrumbLink:hover {
+  text-decoration: underline;
+}
+
+.separator {
+  color: #888;
+  font-size: 18px;
+  margin: 0 4px;
+}
+
+.boardSelectorButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.boardSelectorButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}

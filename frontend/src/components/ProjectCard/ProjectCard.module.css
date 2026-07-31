@@ -50,32 +50,40 @@
 }
 
 .editButton, .deleteButton {
+  width: 34px;
+  height: 34px;
   border: none;
-  background: none;
-  font-size: 12px;
+  border-radius: 8px;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
 .editButton {
-  color: #4A3B1A;
+  background-color: rgba(74, 125, 252, 0.1);
+  color: #4a7dfc;
 }
 
 .editButton:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(74, 125, 252, 0.18);
+  transform: scale(1.05);
 }
 
 .deleteButton {
+  background-color: rgba(192, 57, 43, 0.1);
   color: #c0392b;
 }
 
-.deleteButton:hover {
-  background-color: rgba(192, 57, 43, 0.1);
+.deleteButton:hover:not(:disabled) {
+  background-color: rgba(192, 57, 43, 0.18);
+  transform: scale(1.05);
 }
 
 .deleteButton:disabled {
-  color: #999;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -123,4 +131,21 @@
   color: #4A3B1A;
   font-size: 12px;
   cursor: pointer;
+}
+
+.editTextarea {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #E8DFC8;
+  font-size: 14px;
+  font-family: var(--font-body, sans-serif);
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.editTextarea:focus {
+  outline: none;
+  border-color: #6C63FF;
 }

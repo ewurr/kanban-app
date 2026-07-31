@@ -10,11 +10,20 @@ interface TaskProps {
 
 const POST_IT_COLORS = ['#FFD93D', '#FF9B9B', '#A8E6CF', '#C9C3FF', '#FFB6E1']
 
+function getPriorityColor(priority: string): string{
+    if(priority === 'low') return '#4CAF50'
+    if(priority === 'medium') return '#FFC107'
+    if(priority === 'high') return '#E53935'
+    return 'transparent'
+
+}
+
 export function Task({ task, workspaceId }: TaskProps) {
     const [isHovered, setIsHovered] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const rotation = (task.id % 5) -2
     const color = POST_IT_COLORS[task.id % POST_IT_COLORS.length]
+    const priorityColor = getPriorityColor(task.priority)
 
     return (
         <>
@@ -24,12 +33,17 @@ export function Task({ task, workspaceId }: TaskProps) {
             onClick={() => setIsModalOpen(true)}
             style={{
                 backgroundColor: color,
+                border: `3px solid ${priorityColor}`,
                 transform: isHovered
                 ? 'rotate(0deg) scale(1.03)'
                 : `rotate(${rotation}deg)`,
             }}
             >
-                <p className={styles.title}>{task.title}</p>
+                <p className={styles.title}>
+                    {task.title.length > 30 
+                    ? `${task.title.slice(0, 30)}...` 
+                    : task.title}
+                </p>
 
                 {task.description && (
                     <p className={styles.descriptionPreview}>

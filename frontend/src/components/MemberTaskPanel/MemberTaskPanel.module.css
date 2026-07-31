@@ -1,0 +1,50 @@
+.panel {
+  width: 220px;
+  flex-shrink: 0;
+  background-color: #FFF8ED;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.title {
+  font-family: var(--font-hand, sans-serif);
+  font-size: 22px;
+  color: #4A3B1A;
+  margin: 0 0 16px 0;
+}
+
+.memberList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.memberRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(176, 142, 94, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.memberName {
+  font-size: 13px;
+  color: #4A3B1A;
+}
+
+.taskCount {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #B08E5E;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}

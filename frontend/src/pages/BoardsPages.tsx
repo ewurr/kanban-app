@@ -66,7 +66,6 @@ export function BoardsPage(){
     const myMembership = workspace?.workspaceMembers.find((m) => m.user.id === user?.id)
     const canManage = myMembership?.role === 'owner' || myMembership?.role === 'pm'
 
-    console.log('project:', project, 'workspace:', workspace, 'myMembership:', myMembership, 'canManage:', canManage)
 
     return (
         <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>

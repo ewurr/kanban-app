@@ -1,88 +1,28 @@
-.closedBoard {
-  min-width: 200px;
-  min-height: 110px;
+.miniBoard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   background-color: transparent;
   border: 2px dashed #B08E5E;
   border-radius: 12px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  color: #6B5A3E;
-  font-family: var(--font-body, sans-serif);
-  font-size: 14px;
-
+  padding: 16px;
+  min-height: 200px;
+  box-sizing: border-box;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  width: 100%;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
-.closedBoard:hover {
-  background-color: rgba(201, 168, 118, 0.15);
+.miniBoard:hover {
+  background-color: rgba(255, 255, 255, 0.3);
   border-color: #8A6D3B;
+  transform: translateY(-3px);
 }
 
 .plus {
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 300;
+  color: #B08E5E;
   line-height: 1;
-}
-
-.openBoard {
-  min-width: 200px;
-  background-color: #FFF8ED;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-}
-
-.input {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #E8DFC8;
-  font-size: 14px;
-  font-family: var(--font-body, sans-serif);
-  box-sizing: border-box;
-  margin-bottom: 10px;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #6C63FF;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.saveButton {
-  flex: 1;
-  padding: 8px;
-  border: none;
-  border-radius: 6px;
-  background-color: #4ECDC4;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.saveButton:disabled {
-  background-color: #C9C9C9;
-  cursor: not-allowed;
-}
-
-.cancelButton {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  background-color: transparent;
-  color: #6B5A3E;
-  font-size: 13px;
-  cursor: pointer;
 }

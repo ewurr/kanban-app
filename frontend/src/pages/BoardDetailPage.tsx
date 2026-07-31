@@ -5,6 +5,9 @@ import type { Task as TaskType, Column as ColumnType, Board as BoardType } from 
 import { Column } from '../components/Column/Column'
 import { Board } from '../components/Board/Board'
 import { AddColumnCard } from '../components/AddColumnCard/AddColumnCard'
+import { MemberTaskPanel } from '../components/MemberTaskPanel/MemberTaskPanel'
+import styles from './BoardDetailPage.module.css'
+import { AddTaskCard } from '../components/AddTaskCard/AddTaskCard'
 
 
 export function BoardDetailPage() {
@@ -44,7 +47,7 @@ export function BoardDetailPage() {
     },
   })
 
-  const { data: workspace } = useQuery<{ workspaceMembers: { user: { id: number }; role: string }[] }>({
+  const { data: workspace } = useQuery<{ workspaceMembers: { id: number; user: { id: number; name: string; surname: string }; role: string }[] }>({
     queryKey: ['workspace', board?.project.workspace.id],
     enabled: !!board,
     queryFn: async () => {
@@ -64,24 +67,43 @@ export function BoardDetailPage() {
     ?.filter((column) => column.board.id === Number(id))
     .sort((a, b) => a.position - b.position)
 
+  const boardTasks = tasks?.filter((task) =>
+    boardColumns?.some((col) => col.id === task.column.id)
+  ) ?? []
+
   const myMembership = workspace?.workspaceMembers.find((m) => m.user.id === user?.id)
   const canManage = myMembership?.role === 'owner' || myMembership?.role === 'pm'
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>
-      <Board>
-        {boardColumns?.map((column) => {
-          const columnTasks = tasks?.filter((task) => task.column.id === column.id) ?? []
-          return <Column 
-            key={column.id} 
-            column={column} 
-            tasks={columnTasks} 
-            workspaceId={board?.project.workspace.id ?? 0}
-            canManage={canManage}
+    <div className={styles.pageLayout}>
+      <MemberTaskPanel
+        members={workspace?.workspaceMembers ?? []}
+        boardTasks={boardTasks}
+      />
+
+      <div className={styles.centerColumn}>
+        <Board>
+          {boardColumns?.map((column) => {
+            const columnTasks = tasks?.filter((task) => task.column.id === column.id) ?? []
+            return <Column
+              key={column.id}
+              column={column}
+              tasks={columnTasks}
+              workspaceId={board?.project.workspace.id ?? 0}
+              canManage={canManage}
+            />
+          })}
+        </Board>
+      </div>
+
+      <div className={styles.rightColumn}>
+          <AddColumnCard boardId={Number(id)} nextPosition={boardColumns?.length ?? 0}/>
+          <AddTaskCard
+              boardId={Number(id)}
+              columns={columns ?? []}
+              tasks={tasks ?? []}
           />
-        })}
-        <AddColumnCard boardId={Number(id)} nextPosition={boardColumns?.length ?? 0}/>
-      </Board>
+      </div>
     </div>
   )
 }

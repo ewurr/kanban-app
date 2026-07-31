@@ -1,6 +1,7 @@
 export interface User {
   id: number
   email: string
+  name: string
   surname: string
 }
 
@@ -12,7 +13,7 @@ export interface TaskAssignment {
 export interface Task {
   id: number
   title: string
-  desription: string | null
+  description: string | null
   priority: string
   dueDate: string | null
   createdAt: string
@@ -30,7 +31,6 @@ export interface Column {
   board: {
     id: number
   }
-  
 }
 
 export interface Board {
@@ -42,20 +42,19 @@ export interface Board {
     description: string | null
     workspace: {
       id: number
+      name: string
     }
   }
 }
 
-export interface WorkspaceMember{
+export interface WorkspaceMember {
   id: number
   user: User
   role: string
 }
 
-export interface workspace{
+export interface Workspace {
   id: number
   name: string
-  WorkspaceMember: WorkspaceMember[]
+  workspaceMembers: WorkspaceMember[]
 }
-
-

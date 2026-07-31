@@ -9,6 +9,7 @@ use App\Entity\Task;
 use App\Entity\User;
 use App\Entity\Workspace;
 use App\Enum\WorkspaceRole;
+use App\Repository\TaskAssignmentRepository;
 use App\Repository\WorkspaceMemberRepository;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
@@ -47,6 +48,7 @@ final class WorkspaceVoter extends Voter
 
     public function __construct(
         private readonly WorkspaceMemberRepository $workspaceMemberRepository,
+        private readonly TaskAssignmentRepository $taskAssignmentRepository,
     ) {
     }
 
@@ -80,7 +82,7 @@ final class WorkspaceVoter extends Voter
         $role = $membership->getRole();
 
         return match ($attribute) {
-            self::WORKSPACE_VIEW => true, // üye olan herkes görebilir (buraya kadar gelmiş olmak zaten üye olduğunu kanıtlıyor)
+            self::WORKSPACE_VIEW => $this->canView($subject, $role, $user),
 
             self::WORKSPACE_EDIT,
             self::WORKSPACE_DELETE,
@@ -104,6 +106,24 @@ final class WorkspaceVoter extends Voter
         };
     }
 
+    private function canView(mixed $subject, WorkspaceRole $role, User $user): bool
+    {
+        // Workspace'in kendisi: üye olmak her zaman yeterli
+        if ($subject instanceof Workspace) {
+            return true;
+        }
+
+        // Owner her zaman her şeyi görebilir
+        if ($role === WorkspaceRole::OWNER) {
+            return true;
+        }
+
+        // Owner değilse (PM veya Worker), bu projede en az bir task'a atanmış olmalı
+        $project = $this->resolveProject($subject);
+
+        return $this->taskAssignmentRepository->userHasAssignmentInProject($user, $project);
+    }
+
     private function resolveWorkspace(mixed $subject): Workspace
     {
         return match (true) {
@@ -112,6 +132,16 @@ final class WorkspaceVoter extends Voter
             $subject instanceof Board => $subject->getProject()->getWorkspace(),
             $subject instanceof Column => $subject->getBoard()->getProject()->getWorkspace(),
             $subject instanceof Task => $subject->getColumn()->getBoard()->getProject()->getWorkspace(),
+        };
+    }
+
+    private function resolveProject(mixed $subject): Project
+    {
+        return match (true) {
+            $subject instanceof Project => $subject,
+            $subject instanceof Board => $subject->getProject(),
+            $subject instanceof Column => $subject->getBoard()->getProject(),
+            $subject instanceof Task => $subject->getColumn()->getBoard()->getProject(),
         };
     }
 }

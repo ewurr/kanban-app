@@ -8,9 +8,10 @@ interface BoardCardProps{
     id: number
     name: string
     canManage: boolean
+    onNavigate?: () => void
 }
 
-export function BoardCard({id, name, canManage}: BoardCardProps){
+export function BoardCard({id, name, canManage, onNavigate}: BoardCardProps){
     const [isEditing, setIsEditing] = useState(false)
     const [editedName, setEditedName] = useState(name)
     const { token } = useAuth()
@@ -31,6 +32,7 @@ export function BoardCard({id, name, canManage}: BoardCardProps){
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['boards'] })
+            queryClient.invalidateQueries({ queryKey: ['boards-all'] })
             setIsEditing(false)
         },
     })
@@ -45,6 +47,7 @@ export function BoardCard({id, name, canManage}: BoardCardProps){
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['boards'] })
+            queryClient.invalidateQueries({ queryKey: ['boards-all'] })
         },
     })
 
@@ -94,7 +97,7 @@ export function BoardCard({id, name, canManage}: BoardCardProps){
     }
 
     return(
-        <Link to={`/boards/${id}`} className={styles.miniBoard}>
+        <Link to={`/boards/${id}`} className={styles.miniBoard} onClick={onNavigate}>
             <div className={styles.miniPostIt} style={{ backgroundColor: '#FFD93D' }} />
             <div className={styles.miniPostIt} style={{ backgroundColor: '#FF9B9B' }} />
             <div className={styles.miniPostIt} style={{ backgroundColor: '#A8E6CF' }} />
@@ -102,8 +105,8 @@ export function BoardCard({id, name, canManage}: BoardCardProps){
 
             {canManage && (
                 <div className={styles.cardActions}>
-                    <button className={styles.editButton} onClick={handleEditStart}>Düzenle</button>
-                    <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending}>Sil</button>
+                    <button className={styles.editButton} onClick={handleEditStart} title="Düzenle">✎</button>
+                    <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending} title="Sil">🗑</button>
                 </div>
             )}
         </Link>

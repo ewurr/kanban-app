@@ -1,0 +1,21 @@
+.pageLayout {
+  display: flex;
+  gap: 24px;
+  padding: 2rem;
+  max-width: 1500px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.centerColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.rightColumn {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

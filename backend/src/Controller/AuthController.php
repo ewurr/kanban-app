@@ -78,5 +78,5 @@ final class AuthController extends AbstractController
             $json = $serializer->serialize($this->getUser(), 'json', ['groups' => 'workspace:read']);
 
             return JsonResponse::fromJsonString($json);
-        }
+        }   
 }

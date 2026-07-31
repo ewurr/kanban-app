@@ -170,4 +170,69 @@ final class WorkspaceController extends AbstractController
         return new JsonResponse(null, 204);
     }
 
+    #[Route('/{id}/members/{memberId}', name: 'app_workspace_update_member', methods: ['PUT'])]
+    public function updateMember(
+        Workspace $workspace,
+        int $memberId,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        SerializerInterface $serializer
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_MANAGE_MEMBERS, $workspace);
+
+        $membership = $entityManager->getRepository(WorkspaceMember::class)->find($memberId);
+
+        if ($membership === null || $membership->getWorkspace()->getId() !== $workspace->getId()) {
+            return new JsonResponse(['error' => 'Üyelik bulunamadı'], 404);
+        }
+
+        if ($membership->getRole() === WorkspaceRole::OWNER) {
+            return new JsonResponse(['error' => 'Owner\'ın rolü değiştirilemez'], 403);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $role = WorkspaceRole::tryFrom($data['role'] ?? '');
+
+        if ($role === null) {
+            return new JsonResponse(['error' => 'Geçersiz rol. owner, pm veya worker olmalıdır.'], 400);
+        }
+
+        if ($role === WorkspaceRole::OWNER) {
+            return new JsonResponse(['error' => 'Bir üye owner rolüne yükseltilemez'], 403);
+        }
+
+        $membership->setRole($role);
+        $entityManager->flush();
+
+        $json = $serializer->serialize($workspace, 'json', ['groups' => 'workspace:read']);
+
+        return JsonResponse::fromJsonString($json);
+    }
+
+    #[Route('/{id}/members/{memberId}', name: 'app_workspace_remove_member', methods:['DELETE'])]
+    public function removeMember(
+        Workspace $workspace,
+        int $memberId,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_MANAGE_MEMBERS, $workspace);
+
+        $membership = $entityManager->getRepository(WorkspaceMember::class)->find($memberId);
+
+        if($membership === null || $membership->getWorkspace()->getId() !== $workspace->getId()){
+            return new JsonResponse(['error' => 'Üyelik bulunamadı.'], 404);
+        }
+
+        if($membership->getRole() === WorkspaceRole::OWNER){
+            return new JsonResponse(['error' => 'Owner workspace\'ten çıkarılamaz'], 403);
+        }
+
+        $entityManager->remove($membership);
+        $entityManager->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
 }

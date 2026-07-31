@@ -1,0 +1,132 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(43, 43, 43, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.postIt {
+  background-color: #FFD93D;
+  border-radius: 2px;
+  padding: 28px;
+  width: 360px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.3);
+  transform: rotate(-1deg);
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  border: none;
+  background: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #4A3B1A;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: #2B2B2B;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6B5A2E;
+  margin: 12px 0 4px 0;
+}
+
+.titleInput {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid rgba(74, 59, 26, 0.3);
+  background-color: transparent;
+  font-family: var(--font-hand, sans-serif);
+  font-size: 24px;
+  color: #2B2B2B;
+  box-sizing: border-box;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.titleInput:focus {
+  outline: none;
+  border-bottom-color: #2B2B2B;
+}
+
+.titleInput::placeholder {
+  color: rgba(74, 59, 26, 0.4);
+}
+
+.textarea, .select, .dateInput {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(74, 59, 26, 0.2);
+  background-color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-family: var(--font-body, sans-serif);
+  box-sizing: border-box;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.textarea:focus, .select:focus, .dateInput:focus {
+  outline: none;
+  border-color: #4A3B1A;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.saveButton {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2B2B2B;
+  color: #FFD93D;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  background-color: rgba(74, 59, 26, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #4A3B1A;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: rgba(74, 59, 26, 0.1);
+}

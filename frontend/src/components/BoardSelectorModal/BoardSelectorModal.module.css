@@ -1,0 +1,59 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(43, 43, 43, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #ffffff;
+  background-size: 18px 18px, 24px 24px;
+  background-position: 0 0, 9px 9px;
+  border-radius: 16px;
+  padding: 32px;
+  width: 480px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(43, 43, 43, 0.4);
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  border: none;
+  background: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: #4A3B1A;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: #2B2B2B;
+}
+
+.title {
+  margin: 0 0 24px 0;
+  font-family: var(--font-hand, sans-serif);
+  font-size: 32px;
+  color: #2B2B2B;
+}
+
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.boardCardWrapper {
+  min-width: 0;
+}

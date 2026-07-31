@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../AuthContext'
 import type { Column as ColumnType, Task as TaskType } from '../../types/kanban'
 import { Task } from '../Task/Task'
-import { AddTaskCard } from '../AddTaskCard/AddTaskCard'
 import styles from './Column.module.css'
 
 interface ColumnProps {
@@ -97,7 +96,6 @@ export function Column({ column, tasks, workspaceId, canManage }: ColumnProps) {
         {tasks.map((task) => (
           <Task key={task.id} task={task} workspaceId={workspaceId} />
         ))}
-        <AddTaskCard columnId={column.id} nextPosition={tasks.length}/>
       </div>
     </div>
   )

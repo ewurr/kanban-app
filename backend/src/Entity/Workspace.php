@@ -28,7 +28,7 @@ class Workspace
     }
 
     #[ORM\Column(length: 255)]
-    #[Groups(['workspace:read', 'project:read'])]
+    #[Groups(['workspace:read', 'project:read', 'board:read'])]
     #[Assert\NotBlank(message: 'İsim alanı zorunludur.')]
     #[Assert\Length(min: 2, max: 255, minMessage: 'İsim en az 2 karakter olmalıdır.')]
     private ?string $name = null;

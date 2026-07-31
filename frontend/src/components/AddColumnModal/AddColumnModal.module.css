@@ -1,0 +1,113 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(43, 43, 43, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.sheet {
+  position: relative;
+  background-color: #FFF8ED;
+  border-radius: 4px;
+  padding: 32px 28px;
+  width: 340px;
+  max-width: 90vw;
+  box-shadow: 0 16px 40px rgba(43, 43, 43, 0.35);
+}
+
+.pin {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #E24B4A;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: none;
+  background: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #8A6D3B;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: #4A3B1A;
+}
+
+.fieldLabel {
+  display: block;
+  font-family: var(--font-hand, sans-serif);
+  font-size: 26px;
+  color: #4A3B1A;
+  margin: 8px 0 16px 0;
+  text-align: center;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 14px;
+  border-radius: 8px;
+  border: 1px solid #E8DFC8;
+  background-color: #ffffff;
+  font-size: 15px;
+  font-family: var(--font-body, sans-serif);
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #B08E5E;
+  box-shadow: 0 0 0 3px rgba(176, 142, 94, 0.15);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.saveButton {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #4ECDC4;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  background-color: #D8D0BE;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #8A6D3B;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: rgba(176, 142, 94, 0.1);
+}
