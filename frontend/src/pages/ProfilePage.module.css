@@ -1,0 +1,109 @@
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.cardsRow {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.pageTitle {
+  font-family: var(--font-hand, sans-serif);
+  font-size: 40px;
+  color: #2B2B2B;
+  margin: 0 0 24px 0;
+}
+
+.card {
+  background: linear-gradient(135deg, #2B2B2B 0%, #1a1a1a 100%);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(43, 43, 43, 0.25);
+  border: 1px solid rgba(255, 217, 138, 0.2);
+  flex: 1;
+  min-width: 0;
+}
+
+.sectionTitle {
+  font-family: var(--font-hand, sans-serif);
+  font-size: 24px;
+  color: #FFD98A;
+  margin: 0 0 20px 0;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 16px 0 8px 0;
+}
+
+.fieldLabel:first-of-type {
+  margin-top: 0;
+}
+
+.input, .inputDisabled {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 15px;
+  font-family: var(--font-body, sans-serif);
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FFD98A;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.inputDisabled {
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+.error {
+  color: #ff8a8a;
+  font-size: 13px;
+  margin: 14px 0 0 0;
+}
+
+.success {
+  color: #8aff9e;
+  font-size: 13px;
+  margin: 14px 0 0 0;
+}
+
+.saveButton {
+  width: 100%;
+  padding: 13px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #FFD98A, #FFB84D);
+  color: #2B2B2B;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 184, 77, 0.3);
+}
+
+.saveButton:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}

@@ -19,6 +19,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 450px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .memberRow {
@@ -35,6 +38,21 @@
   color: #4A3B1A;
 }
 
+.memberInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.memberEmail {
+  font-size: 10px;
+  color: rgba(74, 59, 26, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .taskCount {
   font-size: 12px;
   font-weight: 700;
@@ -47,4 +65,8 @@
   align-items: center;
   justify-content: center;
   padding: 0 6px;
+}
+
+.memberRowEmpty {
+  opacity: 0.45;
 }

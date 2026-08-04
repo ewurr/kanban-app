@@ -104,6 +104,7 @@ export function BoardDetailPage() {
               tasks={tasks ?? []}
           />
       </div>
+
     </div>
   )
 }

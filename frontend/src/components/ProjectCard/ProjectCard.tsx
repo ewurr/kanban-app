@@ -10,6 +10,7 @@ interface ProjectCardProps {
     name: string
     description: string | null
     isOwner: boolean
+    animationDelay?: number
 }
 
 interface BoardSummary {
@@ -17,7 +18,7 @@ interface BoardSummary {
     project: {id: number}
 }
 
-export function ProjectCard({ id, name, description, isOwner }: ProjectCardProps) {
+export function ProjectCard({ id, name, description, isOwner, animationDelay }: ProjectCardProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { token } = useAuth()
     const queryClient = useQueryClient()
@@ -67,7 +68,11 @@ export function ProjectCard({ id, name, description, isOwner }: ProjectCardProps
 
     return(
         <>
-            <Link to={linkTo} className={styles.folder}>
+            <Link
+                to={linkTo}
+                className={`${styles.folder} animate-fade-up`}
+                style={{ animationDelay: `${animationDelay ?? 0}s` }}
+            >
                 <div className={styles.tab} />
                 <div className={styles.body}>
                 <h3 className={styles.name}>

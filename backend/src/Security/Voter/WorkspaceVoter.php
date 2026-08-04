@@ -93,11 +93,11 @@ final class WorkspaceVoter extends Voter
 
             self::BOARD_CREATE,
             self::BOARD_EDIT,
-            self::BOARD_DELETE,
-            self::COLUMN_CREATE,
-            self::COLUMN_EDIT,
-            self::COLUMN_DELETE => in_array($role, [WorkspaceRole::OWNER, WorkspaceRole::PM], true),
+            self::BOARD_DELETE => in_array($role, [WorkspaceRole::OWNER, WorkspaceRole::PM], true),
 
+            self::COLUMN_EDIT,
+            self::COLUMN_DELETE,
+            self::COLUMN_CREATE,
             self::TASK_CREATE,
             self::TASK_EDIT,
             self::TASK_DELETE => true, // üye olan herkes (owner+pm+worker)

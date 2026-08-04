@@ -6,9 +6,8 @@ import styles from './Task.module.css'
 interface TaskProps {
     task: TaskType
     workspaceId: number
+    animationDelay?: number
 }
-
-const POST_IT_COLORS = ['#FFD93D', '#FF9B9B', '#A8E6CF', '#C9C3FF', '#FFB6E1']
 
 function getPriorityColor(priority: string): string{
     if(priority === 'low') return '#4CAF50'
@@ -18,25 +17,25 @@ function getPriorityColor(priority: string): string{
 
 }
 
-export function Task({ task, workspaceId }: TaskProps) {
+export function Task({ task, workspaceId, animationDelay }: TaskProps) {
     const [isHovered, setIsHovered] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const rotation = (task.id % 5) -2
-    const color = POST_IT_COLORS[task.id % POST_IT_COLORS.length]
     const priorityColor = getPriorityColor(task.priority)
 
     return (
         <>
-            <div className={styles.postIt} 
+            <div className={`${styles.postIt} animate-fade-up`} 
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={() => setIsModalOpen(true)}
             style={{
-                backgroundColor: color,
+                backgroundColor: task.color,
                 border: `3px solid ${priorityColor}`,
                 transform: isHovered
                 ? 'rotate(0deg) scale(1.03)'
                 : `rotate(${rotation}deg)`,
+                animationDelay: `${animationDelay ?? 0}s`,
             }}
             >
                 <p className={styles.title}>

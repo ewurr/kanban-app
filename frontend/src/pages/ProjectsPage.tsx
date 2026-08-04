@@ -68,8 +68,8 @@ export function ProjectsPage(){
             </div>
 
             <div style={{ width: '260px', flexShrink: 0, paddingTop: '80px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <AddProjectCard workspaceId={Number(id)} />
-                <AddMemberCard workspaceId={Number(id)} />
+                    {isOwner && <AddProjectCard workspaceId={Number(id)} />}
+                    {isOwner && <AddMemberCard workspaceId={Number(id)} />}
             </div>
         </div>
     )

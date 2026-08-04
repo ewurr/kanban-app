@@ -60,6 +60,10 @@ class Task
     #[Groups(['task:read'])]
     private ?Column $column = null;
 
+    #[ORM\Column(length: 20)]
+    #[Groups(['task:read'])]
+    private ?string $color = null;
+
     /**
      * @var Collection<int, TaskAssignment>
      */
@@ -146,6 +150,17 @@ class Task
     public function setColumn(Column $column): static
     {
         $this->column = $column;
+        return $this;
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(string $color): static
+    {
+        $this->color = $color;
         return $this;
     }
 

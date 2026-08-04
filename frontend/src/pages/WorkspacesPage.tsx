@@ -38,7 +38,7 @@ export function WorkspacesPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {data?.map((workspace) => {
+            {data?.map((workspace, index) => {
                 const myMembership = workspace.workspaceMembers.find(
                     (member) => member.user.id === user?.id
                 )
@@ -51,6 +51,7 @@ export function WorkspacesPage() {
                         name={workspace.name}
                         memberCount={workspace.workspaceMembers.length}
                         isOwner={isOwner}
+                        animationDelay={index * 0.05}
                     />
                 )
             })}

@@ -11,6 +11,8 @@ interface AddTaskModalProps {
   onClose: () => void
 }
 
+const POST_IT_COLORS = ['#FFD93D', '#FF9B9B', '#A8E6CF', '#C9C3FF', '#FFB6E1']
+
 export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalProps) {
   const columnsInBoard = columns.filter((c) => c.board.id === boardId).sort((a, b) => a.position - b.position)
 
@@ -19,6 +21,7 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
   const [priority, setPriority] = useState('medium')
   const [dueDate, setDueDate] = useState('')
   const [columnId, setColumnId] = useState<number | ''>(columnsInBoard[0]?.id ?? '')
+  const [randomColor] = useState(() => POST_IT_COLORS[Math.floor(Math.random() * POST_IT_COLORS.length)])
   const { token } = useAuth()
   const queryClient = useQueryClient()
 
@@ -42,6 +45,7 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
           priority,
           position: nextPosition,
           dueDate: dueDate || null,
+          color: randomColor,
         }),
       })
       if (!response.ok) throw new Error('Task oluşturulamadı')
@@ -54,8 +58,8 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
   })
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.postIt} onClick={(e) => e.stopPropagation()}>
+    <div className={`${styles.overlay} animate-fade-in`} onClick={onClose}>
+      <div className={`${styles.postIt} animate-pop-in`} style={{ backgroundColor: randomColor }} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>×</button>
 
         <label className={styles.fieldLabel}>Column</label>

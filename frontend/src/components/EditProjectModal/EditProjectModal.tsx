@@ -41,8 +41,8 @@ export function EditProjectModal({ id, name, description, onClose }: EditProject
   }
 
   return (
-    <div className={styles.overlay} onClick={handleClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={`${styles.overlay} animate-fade-in`} onClick={handleClose}>
+      <div className={`${styles.modal} animate-pop-in`} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={handleClose}>
           ×
         </button>

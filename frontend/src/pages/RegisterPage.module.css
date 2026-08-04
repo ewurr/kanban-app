@@ -1,3 +1,10 @@
+.page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -9,11 +16,35 @@
   }
 }
 
-.page {
-  min-height: 100vh;
-  width: 100%;
-  display: flex;
-  box-sizing: border-box;
+@keyframes fadeUpFaded {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shapeEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 .formPanel {
@@ -159,13 +190,13 @@
   line-height: 1;
 }
 
-/* Sağ görsel panel */
+/* Sol görsel panel */
 
 .visualPanel {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #6C63FF 0%, #4ECDC4 100%);
+  background: linear-gradient(135deg, #FF9B6A 0%, #FF6B9B 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,7 +205,7 @@
 .shape1, .shape2, .shape3 {
   position: absolute;
   border-radius: 24px;
-  opacity: 0.15;
+  opacity: 0;
 }
 
 .shape1 {
@@ -182,19 +213,21 @@
   height: 220px;
   background-color: #FFD93D;
   top: 8%;
-  left: 10%;
-  transform: rotate(-12deg);
-  animation: float 8s ease-in-out infinite;
+  right: 10%;
+  animation: 
+    shapeEnter 0.7s ease forwards,
+    float 8s ease-in-out 0.7s infinite;
 }
 
 .shape2 {
   width: 160px;
   height: 160px;
-  background-color: #FF9B9B;
+  background-color: #C9C3FF;
   bottom: 12%;
-  right: 12%;
-  transform: rotate(20deg);
-  animation: float 10s ease-in-out infinite reverse;
+  left: 12%;
+  animation: 
+    shapeEnter 0.7s ease 0.15s forwards,
+    float 10s ease-in-out 0.85s infinite reverse;
 }
 
 .shape3 {
@@ -202,18 +235,10 @@
   height: 120px;
   background-color: #FFFFFF;
   top: 45%;
-  right: 20%;
-  transform: rotate(-8deg);
-  animation: float 7s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(-12deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(-8deg);
-  }
+  left: 20%;
+  animation: 
+    shapeEnter 0.7s ease 0.3s forwards,
+    float 7s ease-in-out 1s infinite;
 }
 
 .visualContent {

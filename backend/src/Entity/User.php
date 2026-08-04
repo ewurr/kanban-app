@@ -29,6 +29,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180)]
     #[Groups(['workspace:read', 'task:read'])]
+    #[Assert\NotBlank(message: 'The email field is required.')]
+    #[Assert\Email(message: 'The email {{ value }} is not a valid email address.')]
     private ?string $email = null;
 
     #[ORM\Column(length: 100)]

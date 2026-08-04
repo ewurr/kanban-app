@@ -33,8 +33,8 @@ export function AddWorkspaceModal({ onClose }: AddWorkspaceModalProps) {
     })
     
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={`${styles.overlay} animate-fade-in`} onClick={onClose}>
+            <div className={`${styles.modal} animate-pop-in`} onClick={(e) => e.stopPropagation()}>
                 <button className={styles.closeButton} onClick={onClose}>
                     ×
                 </button>

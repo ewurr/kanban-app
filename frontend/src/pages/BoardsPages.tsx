@@ -72,14 +72,14 @@ export function BoardsPage(){
             <div style={{ flex: 1 }}>
                 <h1 style={{ fontFamily: 'var(--font-hand)', fontSize: '36px', marginBottom: '2rem' }}>Boards</h1>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '24px' }}>
-                    {filteredBoards?.map((board) => (
-                        <BoardCard key={board.id} id={board.id} name={board.name} canManage={canManage} />
+                    {filteredBoards?.map((board, index) => (
+                        <BoardCard key={board.id} id={board.id} name={board.name} canManage={canManage} animationDelay={index * 0.05} />
                     ))}
                 </div>
             </div>
             
             <div style={{ width: '260px', flexShrink: 0, paddingTop: '80px' }}>
-                    <AddBoardCard projectId={Number(id)} />
+                    {canManage && <AddBoardCard projectId={Number(id)} />}
             </div>
         </div>
     )

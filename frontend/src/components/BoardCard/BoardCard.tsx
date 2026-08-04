@@ -9,9 +9,10 @@ interface BoardCardProps{
     name: string
     canManage: boolean
     onNavigate?: () => void
+    animationDelay?: number
 }
 
-export function BoardCard({id, name, canManage, onNavigate}: BoardCardProps){
+export function BoardCard({id, name, canManage, onNavigate, animationDelay}: BoardCardProps){
     const [isEditing, setIsEditing] = useState(false)
     const [editedName, setEditedName] = useState(name)
     const { token } = useAuth()
@@ -97,8 +98,12 @@ export function BoardCard({id, name, canManage, onNavigate}: BoardCardProps){
     }
 
     return(
-        <Link to={`/boards/${id}`} className={styles.miniBoard} onClick={onNavigate}>
-            <div className={styles.miniPostIt} style={{ backgroundColor: '#FFD93D' }} />
+        <Link
+            to={`/boards/${id}`}
+            className={`${styles.miniBoard} animate-fade-up`}
+            style={{ animationDelay: `${animationDelay ?? 0}s` }}
+            onClick={onNavigate}
+        >            <div className={styles.miniPostIt} style={{ backgroundColor: '#FFD93D' }} />
             <div className={styles.miniPostIt} style={{ backgroundColor: '#FF9B9B' }} />
             <div className={styles.miniPostIt} style={{ backgroundColor: '#A8E6CF' }} />
             <span className={styles.name}>{name}</span>

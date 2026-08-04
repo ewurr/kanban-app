@@ -60,6 +60,7 @@ final class TaskController extends AbstractController
         $task->setPriority($data['priority']);
         $task->setPosition($data['position']);
         $task->setColumn($column);
+        $task->setColor($data['color'] ?? '#FFD93D'); 
 
         if(isset($data['dueDate'])){
             $task->setDueDate(new \DateTimeImmutable($data['dueDate']));

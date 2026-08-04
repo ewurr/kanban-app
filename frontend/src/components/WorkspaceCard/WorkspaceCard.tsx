@@ -8,11 +8,12 @@ interface WorkspaceCardProps {
     name: string
     memberCount: number
     isOwner: boolean
+    animationDelay?: number
 }
 
 const CARD_COLORS = ['#6C63FF', '#FF6B6B', '#4ECDC4', '#FFB6E1', '#FFD93D']
 
-export function WorkspaceCard({ id, name, memberCount, isOwner }: WorkspaceCardProps) {
+export function WorkspaceCard({ id, name, memberCount, isOwner, animationDelay }: WorkspaceCardProps) {
     const color = CARD_COLORS[id % CARD_COLORS.length]
     const { token } = useAuth()
     const queryClient = useQueryClient()
@@ -39,8 +40,11 @@ export function WorkspaceCard({ id, name, memberCount, isOwner }: WorkspaceCardP
     }
 
     return(
-        <Link to={`/workspaces/${id}`} className={styles.card}>
-            <div className={styles.stripe} style={{ backgroundColor: color }} />
+        <Link
+            to={`/workspaces/${id}`}
+            className={`${styles.card} animate-fade-up`}
+            style={{ animationDelay: `${animationDelay ?? 0}s` }}
+        >            <div className={styles.stripe} style={{ backgroundColor: color }} />
             <div className={styles.body}>
                 <h3 className={styles.name}>{name}</h3>
                 <p className={styles.member}>{memberCount} Üye</p>

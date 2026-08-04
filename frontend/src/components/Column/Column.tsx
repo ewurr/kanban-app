@@ -83,20 +83,18 @@ export function Column({ column, tasks, workspaceId, canManage }: ColumnProps) {
       ) : (
         <div className={styles.titleRow}>
           <h3 className={styles.title}>{column.name}</h3>
-          {canManage && (
-            <div className={styles.titleActions}>
-              <button className={styles.editButton} onClick={() => { setEditedName(column.name); setIsEditing(true) }}>✎</button>
-              <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending}>×</button>
-            </div>
-          )}
+          <div className={styles.titleActions}>
+            <button className={styles.editButton} onClick={() => { setEditedName(column.name); setIsEditing(true) }}>✎</button>              <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending}>×</button>
+          </div>
         </div>
       )}
 
       <div className={styles.taskList}>
-        {tasks.map((task) => (
-          <Task key={task.id} task={task} workspaceId={workspaceId} />
-        ))}
+          {tasks.map((task, index) => (
+              <Task key={task.id} task={task} workspaceId={workspaceId} animationDelay={index * 0.05} />
+          ))}
       </div>
+      
     </div>
   )
 }

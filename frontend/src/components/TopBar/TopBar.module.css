@@ -41,7 +41,13 @@
 
 .userName {
   font-size: 14px;
-  font-family: var(--font-hand, sans-serif);
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.userName:hover {
+  text-decoration: underline;
 }
 
 .logoutButton {
@@ -87,4 +93,21 @@
 .boardSelectorButton:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 6px;
+}
+
+.userName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.roleBadge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #2B2B2B;
+  background-color: #FFD98A;
+  padding: 2px 8px;
+  border-radius: 10px;
 }

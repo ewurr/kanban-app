@@ -15,6 +15,7 @@ export interface Task {
   title: string
   description: string | null
   priority: string
+  color: string
   dueDate: string | null
   createdAt: string
   position: number
@@ -58,3 +59,4 @@ export interface Workspace {
   name: string
   workspaceMembers: WorkspaceMember[]
 }
+

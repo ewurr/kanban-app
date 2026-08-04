@@ -35,17 +35,23 @@ final class AuthController extends AbstractController
             return new JsonResponse(['error' => 'Bu email zaten kayıtlı'], 409);
         }
 
-        // 2. yeni user oluştur
+        // 2. şifre uzunluk kontrolü (hash'lenmeden önce, çünkü hash her zaman uzun olur)
+        $plainPassword = $data['password'] ?? '';
+        if(strlen($plainPassword) < 8) {
+            return new JsonResponse(['error' => 'Password must be at least 8 characters long.'], 400);
+        }
+
+        // 3. yeni user oluştur
         $user = new User();
         $user->setEmail($data['email'] ?? '');
         $user->setName($data['name'] ?? '');
         $user->setSurname($data['surname'] ?? '');
 
-        // 3. şifreyi hashleyerek kaydet
+        // 4. şifreyi hashleyerek kaydet
         $hashedPassword = $passwordHasher->hashPassword($user, $data['password'] ?? '');
         $user->setPassword($hashedPassword);
 
-        // 4. validasyon
+        // 5. validasyon
         $errors = $validator->validate($user);
 
         if (count($errors) > 0) {
@@ -60,7 +66,7 @@ final class AuthController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // 5. token üret
+        // 6. token üret
         $token = $jwtManager->create($user);
 
         $json = $serializer->serialize($user, 'json', ['groups' => 'workspace:read']);
@@ -78,5 +84,75 @@ final class AuthController extends AbstractController
             $json = $serializer->serialize($this->getUser(), 'json', ['groups' => 'workspace:read']);
 
             return JsonResponse::fromJsonString($json);
-        }   
-}
+        }
+        
+        #[Route('/me', name: 'app_auth_profile', methods:['PUT'])]
+        public function updateProfile(
+            Request $request,
+            EntityManagerInterface $entityManager,
+            ValidatorInterface $validator,
+            SerializerInterface $serializer
+        ): JsonResponse{
+            /**@var User $user */
+            $user = $this->getUser();
+
+            $data = json_decode($request->getContent(), true);
+
+            if(isset($data['name'])) {
+                $user->setName($data['name']);
+            }
+
+            if(isset($data['surname'])) {
+                $user->setSurname($data['surname']);
+            }
+
+            $errors = $validator->validate($user);
+            
+            if(count($errors) > 0) {
+                $errorMessages = [];
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error->getMessage();
+                }
+
+                return new JsonResponse(['errors' => $errorMessages], 400);
+            }
+
+            $entityManager->flush();
+
+            $json = $serializer->serialize($user, 'json', ['groups' => 'workspace:read']);
+
+            return JsonResponse::fromJsonString($json);
+        }
+
+        #[Route('/me/password', name: 'app_auth_change_password', methods: ['PUT'])]
+        public function changePassword(
+            Request $request,
+            EntityManagerInterface $entityManager,
+            UserPasswordHasherInterface $passwordHasher
+        ): JsonResponse {
+            /**@var User $user */
+            $user = $this->getUser();
+
+            $data = json_decode($request->getContent(), true);
+
+            $currentPassword = $data['currentPassword'] ?? '';
+            $newPassword = $data['newPassword'] ?? '';
+
+            if(!$passwordHasher->isPasswordValid($user, $currentPassword)) {
+                return new JsonResponse(['error' => 'Mevcut şifre yanlış.'], 400);
+            }
+
+            if(strlen($newPassword) < 8) {
+                return new JsonResponse(['error' => 'Yeni şifre en az 8 karakter olmalıdır.'], 400);
+            }
+
+            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $user->setPassword($hashedPassword);
+
+            $entityManager->flush();
+
+            return new JsonResponse(['message' => 'Şifre başarıyla değiştirildi.'], 200);
+        }
+
+
+    }

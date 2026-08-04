@@ -12,7 +12,6 @@
 }
 
 .postIt {
-  background-color: #FFD93D;
   border-radius: 2px;
   padding: 28px;
   width: 360px;
@@ -21,7 +20,6 @@
   overflow-y: auto;
   position: relative;
   box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.3);
-  transform: rotate(-1deg);
 }
 
 .closeButton {

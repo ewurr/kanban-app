@@ -58,11 +58,17 @@ export function TopBar() {
     },
   })
 
+  // Hangi seviyedeysek oradan güncel workspace id'sini çıkarıyoruz
+  const currentWorkspaceId = workspaceIdFromUrl
+    ?? project?.workspace.id
+    ?? board?.project.workspace.id
+    ?? null
+
   const { data: workspaceForPermission } = useQuery<{ workspaceMembers: { user: { id: number }; role: string }[] }>({
-    queryKey: ['workspace', board?.project.workspace.id],
-    enabled: !!board,
+    queryKey: ['workspace', currentWorkspaceId],
+    enabled: currentWorkspaceId !== null,
     queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${board?.project.workspace.id}`, {
+      const response = await fetch(`http://localhost:8000/api/workspaces/${currentWorkspaceId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -72,6 +78,13 @@ export function TopBar() {
 
   const myMembership = workspaceForPermission?.workspaceMembers.find((m) => m.user.id === user?.id)
   const canManageBoards = myMembership?.role === 'owner' || myMembership?.role === 'pm'
+
+  const roleLabels: Record<string, string> = {
+    owner: 'Owner',
+    pm: 'PM',
+    worker: 'Worker',
+  }
+  const currentRoleLabel = myMembership ? roleLabels[myMembership.role] : null
 
   return (
     <>
@@ -123,7 +136,12 @@ export function TopBar() {
         </div>
 
         <div className={styles.userSection}>
-          {user && <span className={styles.userName}>{user.name} {user.surname}</span>}
+          {user && (
+            <Link to="/profile" className={styles.userName}>
+              {user.name} {user.surname}
+              {currentRoleLabel && <span className={styles.roleBadge}>{currentRoleLabel}</span>}
+            </Link>
+          )}
           <button className={styles.logoutButton} onClick={logout}>Çıkış</button>
         </div>
       </div>

@@ -33,8 +33,8 @@ export function BoardSelectorModal({ projectId, canManage, onClose }: BoardSelec
   const boardsInProject = boards?.filter((b) => b.project.id === projectId) ?? []
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={`${styles.overlay} animate-fade-in`} onClick={onClose}>
+      <div className={`${styles.modal} animate-pop-in`} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>×</button>
 
         <h2 className={styles.title}>Board'lar</h2>
@@ -50,7 +50,6 @@ export function BoardSelectorModal({ projectId, canManage, onClose }: BoardSelec
               />
             </div>
           ))}
-
           {canManage && (
             <div className={styles.boardCardWrapper}>
               <AddBoardCard projectId={projectId} />

@@ -39,8 +39,8 @@ export function AddColumnModal({ boardId, nextPosition, onClose }: AddColumnModa
   })
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
+    <div className={`${styles.overlay} animate-fade-in`} onClick={onClose}>
+      <div className={`${styles.sheet} animate-pop-in`} onClick={(e) => e.stopPropagation()}>
         <div className={styles.pin} />
         <button className={styles.closeButton} onClick={onClose}>×</button>
 
