@@ -9,39 +9,53 @@ interface TaskProps {
     animationDelay?: number
 }
 
-function getPriorityColor(priority: string): string{
-    if(priority === 'low') return '#4CAF50'
-    if(priority === 'medium') return '#FFC107'
-    if(priority === 'high') return '#E53935'
+function getPriorityColor(priority: string): string {
+    if (priority === 'low') return '#4CAF50'
+    if (priority === 'medium') return '#FFC107'
+    if (priority === 'high') return '#E53935'
     return 'transparent'
+}
 
+function getDueDateStatus(dueDate: string | null): 'overdue' | 'soon' | null {
+    if (!dueDate) return null
+
+    const now = new Date()
+    const due = new Date(dueDate)
+    const oneDayMs = 24 * 60 * 60 * 1000
+
+    if (due.getTime() < now.getTime()) return 'overdue'
+    if (due.getTime() - now.getTime() <= oneDayMs) return 'soon'
+    return null
 }
 
 export function Task({ task, workspaceId, animationDelay }: TaskProps) {
-    const [isHovered, setIsHovered] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const rotation = (task.id % 5) -2
+    const rotation = (task.id % 5) - 2
     const priorityColor = getPriorityColor(task.priority)
+    const dueDateStatus = getDueDateStatus(task.dueDate)
 
     return (
         <>
-            <div className={`${styles.postIt} animate-fade-up`} 
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onClick={() => setIsModalOpen(true)}
-            style={{
-                backgroundColor: task.color,
-                border: `3px solid ${priorityColor}`,
-                transform: isHovered
-                ? 'rotate(0deg) scale(1.03)'
-                : `rotate(${rotation}deg)`,
-                animationDelay: `${animationDelay ?? 0}s`,
-            }}
+            <div className={`${styles.postIt} animate-fade-up`}
+                onClick={() => setIsModalOpen(true)}
+                style={{
+                    backgroundColor: task.color,
+                    border: `3px solid ${priorityColor}`,
+                    transform: `rotate(${rotation}deg)`,
+                    animationDelay: `${animationDelay ?? 0}s`,
+                }}
             >
+                {dueDateStatus === 'overdue' && (
+                    <span className={styles.dueBadgeOverdue}>⚠ Gecikti</span>
+                )}
+                {dueDateStatus === 'soon' && (
+                    <span className={styles.dueBadgeSoon}>⏰ Yaklaşıyor</span>
+                )}
+
                 <p className={styles.title}>
-                    {task.title.length > 30 
-                    ? `${task.title.slice(0, 30)}...` 
-                    : task.title}
+                    {task.title.length > 30
+                        ? `${task.title.slice(0, 30)}...`
+                        : task.title}
                 </p>
 
                 {task.description && (
@@ -49,7 +63,6 @@ export function Task({ task, workspaceId, animationDelay }: TaskProps) {
                         {task.description.length > 40
                             ? `${task.description.slice(0, 40)}...`
                             : task.description}
-
                     </p>
                 )}
 

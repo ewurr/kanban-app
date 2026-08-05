@@ -16,7 +16,7 @@ class Board
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['board:read', 'column:read'])]
+    #[Groups(['board:read', 'column:read', 'notification:read'])]
     private ?int $id = null;
 
     public function __construct()

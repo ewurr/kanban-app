@@ -238,3 +238,128 @@
   display: flex;
   gap: 8px;
 }
+
+.tabRow {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 16px 0;
+  border-bottom: 1px solid rgba(74, 59, 26, 0.15);
+  padding-right: 24px;
+}
+
+.tab, .tabActive {
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #6B5A2E;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: #4A3B1A;
+}
+
+.tabActive {
+  color: #2B2B2B;
+  border-bottom: 2px solid #2B2B2B;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.historyText {
+  font-size: 13px;
+  color: #2B2B2B;
+}
+
+.historyDate {
+  font-size: 11px;
+  color: #6B5A2E;
+}
+
+.commentsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.commentList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.commentItem {
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 10px 12px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.commentAuthor {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2B2B2B;
+}
+
+.commentContent {
+  font-size: 13px;
+  color: #2B2B2B;
+  white-space: pre-wrap;
+}
+
+.commentActions {
+  display: flex;
+  gap: 10px;
+}
+
+.commentActionButton {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B5A2E;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.commentActionButton:hover {
+  color: #4A3B1A;
+}
+
+.commentEditForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.addCommentRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

@@ -16,6 +16,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Enum\ActivityAction;
+use App\Service\ActivityLogger;
+use App\Repository\ActivityLogRepository;
+use App\Service\NotificationService;
 
 
 #[Route('/api/tasks')]
@@ -46,7 +50,8 @@ final class TaskController extends AbstractController
         Request $request,
         SerializerInterface $serializer, 
         EntityManagerInterface $entityManager,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        ActivityLogger $activityLogger
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -78,6 +83,9 @@ final class TaskController extends AbstractController
         }
 
         $entityManager->persist($task);
+
+        $activityLogger->log($task, ActivityAction::Created, $this->getUser());
+
         $entityManager->flush();
 
         $json = $serializer->serialize($task, 'json', ['groups' => 'task:read']);
@@ -91,11 +99,16 @@ final class TaskController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        ActivityLogger $activityLogger
     ): JsonResponse {
         $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
 
         $data = json_decode($request->getContent(), true);
+
+        $oldColumnId = $task->getColumn()?->getId();
+        $oldColumName = $task->getColumn()?->getName();
+        $oldPriority = $task->getPriority();
 
         if(isset($data['title'])){
             $task->setTitle($data['title']);
@@ -122,6 +135,28 @@ final class TaskController extends AbstractController
             $task->setColumn($column);
         }
 
+        $newColumnId = $task->getColumn()?->getId();
+
+        if($oldColumnId !== null && $newColumnId !== null && $oldColumnId !== $newColumnId){
+            $activityLogger->log(
+                $task, 
+                ActivityAction::Moved, 
+                $this->getUser(), 
+                $oldColumName, 
+                $task->getColumn()?->getName()
+            );
+        }
+
+        if(isset($data['priority']) && $oldPriority !== null && $oldPriority !== $data['priority']){
+            $activityLogger->log(
+                $task, 
+                ActivityAction::PriorityChanged, 
+                $this->getUser(), 
+                $oldPriority, 
+                $data['priority']
+            );
+        }
+
         $errors = $validator->validate($task);
 
         if(count($errors) > 0){
@@ -145,7 +180,9 @@ final class TaskController extends AbstractController
         Task $task,
         Request $request,
         EntityManagerInterface $entityManager,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ActivityLogger $activityLogger,
+        NotificationService $notificationService
     ): JsonResponse {
         $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
 
@@ -171,6 +208,19 @@ final class TaskController extends AbstractController
         $task->getAssignments()->add($assignment);
 
         $entityManager->persist($assignment);
+        
+        $activityLogger->log(
+            $task,
+            ActivityAction::Assigned,
+            $this->getUser(),
+            null,
+            $user->getName() . ' ' . $user->getSurname()
+        );
+
+        if ($this->getUser() !== $user) {
+            $notificationService->notifyTaskAssigned($task, $user);
+        }
+
         $entityManager->flush();
 
         $json = $serializer->serialize($task, 'json', ['groups' => 'task:read']);
@@ -182,7 +232,8 @@ final class TaskController extends AbstractController
     public function removeAssignee(
         Task $task,
         int $userId,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ActivityLogger $activityLogger
     ): JsonResponse {
         $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
 
@@ -199,6 +250,15 @@ final class TaskController extends AbstractController
             return new JsonResponse(['error' => 'This user is not assigned to this task.', 404]);
         }
 
+        $activityLogger->log(
+            $task,
+            ActivityAction::Unassigned,
+            $this->getUser(),
+            null,
+            $user->getName() . ' ' . $user->getSurname(),
+            null
+        );
+
         $entityManager->remove($assignment);
         $entityManager->flush();
 
@@ -206,13 +266,12 @@ final class TaskController extends AbstractController
     }
 
 
-
-
-
     #[Route('/{id}', name: 'app_task_delete', methods: ['DELETE'])]
-    public function delete (Task $task, EntityManagerInterface $entityManager): JsonResponse 
+    public function delete (Task $task, EntityManagerInterface $entityManager, ActivityLogger $activityLogger): JsonResponse 
     {
         $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_DELETE, $task);
+
+        $activityLogger->logTaskDeleted($task, $this->getUser());
 
         $entityManager->remove($task);
         $entityManager->flush();
@@ -220,8 +279,19 @@ final class TaskController extends AbstractController
         return new JsonResponse(null, 204);
     }
 
-    
+    #[Route('/{id}/activity', name: 'app_task_activity', methods: ['GET'])]
+    public function activity (
+        Task $task,
+        SerializerInterface $serializer,
+        ActivityLogRepository $activityLogRepository
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_VIEW, $task);
 
+        $logs = $activityLogRepository->findByTaskOrdered($task);
 
+        $json = $serializer->serialize($logs, 'json', ['groups' => 'activity:read']);
+
+        return JsonResponse::fromJsonString($json);
+    }
 
 }

@@ -19,7 +19,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['workspace:read', 'task:read'])]
+    #[Groups(['workspace:read', 'task:read', 'activity:read', 'comment:read'])]
     private ?int $id = null;
 
     public function __construct()
@@ -34,12 +34,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['workspace:read', 'task:read'])]
+    #[Groups(['workspace:read', 'task:read', 'activity:read', 'comment:read'])]
     #[Assert\NotBlank(message: 'The name field is required.')]
     private ?string $name = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['workspace:read', 'task:read'])]
+    #[Groups(['workspace:read', 'task:read', 'activity:read', 'comment:read'])]
     #[Assert\NotBlank(message: 'The surname field is required.')]
     private ?string $surname = null;
 

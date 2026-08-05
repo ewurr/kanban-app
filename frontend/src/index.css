@@ -115,11 +115,11 @@ html {
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    translate: 0 16px;
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    translate: 0 0;
   }
 }
 
@@ -156,4 +156,13 @@ html {
 .animate-pop-in {
   opacity: 0;
   animation: popIn 0.25s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-pop-in {
+    animation: none;
+    opacity: 1;
+  }
 }

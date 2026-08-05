@@ -6,6 +6,7 @@ import type { Board as BoardType } from '../../types/kanban'
 import styles from './TopBar.module.css'
 import { SideMenu } from '../SideMenu/SideMenu'
 import { BoardSelectorModal } from '../BoardSelectorModal/BoardSelectorModal'
+import { NotificationBell } from '../NotificationBell/NotificationBell'
 
 export function TopBar() {
   const { user, token, logout } = useAuth()
@@ -136,6 +137,7 @@ export function TopBar() {
         </div>
 
         <div className={styles.userSection}>
+          <NotificationBell />
           {user && (
             <Link to="/profile" className={styles.userName}>
               {user.name} {user.surname}

@@ -18,7 +18,7 @@ class Column
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['column:read', 'task:read'])]
+    #[Groups(['column:read', 'task:read', 'notification:read'])]
     private ?int $id = null;
 
     public function __construct()
@@ -38,7 +38,7 @@ class Column
 
     #[ORM\ManyToOne(targetEntity: Board::class)]
     #[ORM\JoinColumn(nullable: false, onDelete:'CASCADE')]
-    #[Groups(['column:read'])]
+    #[Groups(['column:read', 'notification:read'])]
     private ?Board $board = null;
 
     /**

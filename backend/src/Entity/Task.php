@@ -19,7 +19,7 @@ class Task
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['task:read'])]
+    #[Groups(['task:read', 'notification:read'])]
     private ?int $id = null;
 
     public function __construct()
@@ -57,7 +57,7 @@ class Task
 
     #[ORM\ManyToOne(targetEntity: Column::class)]
     #[ORM\JoinColumn(nullable: false, onDelete:'CASCADE')]
-    #[Groups(['task:read'])]
+    #[Groups(['task:read', 'notification:read'])]
     private ?Column $column = null;
 
     #[ORM\Column(length: 20)]

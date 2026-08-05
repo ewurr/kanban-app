@@ -35,4 +35,16 @@ class TaskAssignmentRepository extends ServiceEntityRepository
 
     return $count > 0;
 }
+
+    /**
+     * @return TaskAssignment[]
+     */
+    public function findByUser(User $user): array
+    {
+        return $this->createQueryBuilder('ta')
+            ->where('ta.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
 }

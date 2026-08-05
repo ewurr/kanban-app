@@ -60,3 +60,36 @@ export interface Workspace {
   workspaceMembers: WorkspaceMember[]
 }
 
+export interface ActivityLog {
+  id: number
+  actionType: 'created' | 'moved' | 'assigned' | 'unassigned' | 'priority_changed' | 'deleted'
+  user: User
+  oldValue: string | null
+  newValue: string | null
+  createdAt: string
+}
+
+export interface Comment {
+  id: number
+  content: string
+  author: User
+  createdAt: string
+  editedAt: string | null
+}
+
+export interface Notification {
+  id: number
+  type: 'task_assigned' | 'due_date_approaching' | 'due_date_overdue'
+  taskTitleSnapshot: string | null
+  isRead: boolean
+  createdAt: string
+  task: {
+    id: number
+    column: {
+      id: number
+      board: {
+        id: number
+      }
+    }
+  } | null
+}

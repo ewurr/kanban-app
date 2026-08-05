@@ -55,13 +55,15 @@ export function ProjectsPage(){
             <div style={{ flex: 1 }}>
                 <h1 style={{ fontFamily: 'var(--font-hand)', fontSize: '36px', marginBottom: '2rem' }}>Projeler</h1>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '24px 28px' }}>
-                    {filteredProjects?.map((project) => (
+                    {filteredProjects?.map((project, index) => (
                         <ProjectCard
                             key={project.id}
                             id={project.id}
                             name={project.name}
                             description={project.description}
                             isOwner={isOwner}
+                            animationDelay={index * 0.05}
+
                         />
                     ))}
                 </div>
