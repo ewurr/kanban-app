@@ -7,9 +7,10 @@ import styles from './TopBar.module.css'
 import { SideMenu } from '../SideMenu/SideMenu'
 import { BoardSelectorModal } from '../BoardSelectorModal/BoardSelectorModal'
 import { NotificationBell } from '../NotificationBell/NotificationBell'
+import { apiClient } from '../../lib/apiClient'
 
 export function TopBar() {
-  const { user, token, logout } = useAuth()
+  const { user, logout } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isBoardSelectorOpen, setIsBoardSelectorOpen] = useState(false)
   const location = useLocation()
@@ -26,37 +27,19 @@ export function TopBar() {
   const { data: workspace } = useQuery<{ name: string }>({
     queryKey: ['breadcrumb-workspace', workspaceIdFromUrl],
     enabled: workspaceIdFromUrl !== null,
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${workspaceIdFromUrl}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
+    queryFn: () => apiClient.get(`/workspaces/${workspaceIdFromUrl}`),
   })
 
   const { data: project } = useQuery<{ name: string; workspace: { id: number; name: string } }>({
     queryKey: ['breadcrumb-project', projectIdFromUrl],
     enabled: projectIdFromUrl !== null,
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/projects/${projectIdFromUrl}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
+    queryFn: () => apiClient.get(`/projects/${projectIdFromUrl}`),
   })
 
   const { data: board } = useQuery<BoardType>({
     queryKey: ['breadcrumb-board', boardIdFromUrl],
     enabled: boardIdFromUrl !== null,
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/boards/${boardIdFromUrl}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
+    queryFn: () => apiClient.get<BoardType>(`/boards/${boardIdFromUrl}`),
   })
 
   // Hangi seviyedeysek oradan güncel workspace id'sini çıkarıyoruz
@@ -68,15 +51,8 @@ export function TopBar() {
   const { data: workspaceForPermission } = useQuery<{ workspaceMembers: { user: { id: number }; role: string }[] }>({
     queryKey: ['workspace', currentWorkspaceId],
     enabled: currentWorkspaceId !== null,
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${currentWorkspaceId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
+    queryFn: () => apiClient.get(`/workspaces/${currentWorkspaceId}`),
   })
-
   const myMembership = workspaceForPermission?.workspaceMembers.find((m) => m.user.id === user?.id)
   const canManageBoards = myMembership?.role === 'owner' || myMembership?.role === 'pm'
 

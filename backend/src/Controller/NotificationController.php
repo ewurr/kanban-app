@@ -16,12 +16,9 @@ final class NotificationController extends AbstractController
     #[Route('', name: 'app_notification_index', methods: ['GET'])]
     public function index(
         NotificationRepository $notificationRepository,
-        NotificationService $notificationService,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
     ): JsonResponse {
         $user = $this->getUser();
-
-        $notificationService->checkDueDatesForUser($user);
 
         $notifications = $notificationRepository->findByRecipientOrdered($user);
 
@@ -39,7 +36,7 @@ final class NotificationController extends AbstractController
         $notification = $notificationRepository->find($id);
 
         if ($notification === null || $notification->getRecipient() !== $this->getUser()) {
-            return new JsonResponse(['error' => 'Notification not found'], 404);
+            return new JsonResponse(['error' => 'Bildirim bulunamadı.'], 404);
         }
 
         $notification->setIsRead(true);
@@ -75,7 +72,7 @@ final class NotificationController extends AbstractController
         $notification = $notificationRepository->find($id);
 
         if ($notification === null || $notification->getRecipient() !== $this->getUser()) {
-            return new JsonResponse(['error' => 'Notification not found'], 404);
+            return new JsonResponse(['error' => 'Bildirim bulunamadı.'], 404);
         }
 
         $notification->setIsDeleted(true);

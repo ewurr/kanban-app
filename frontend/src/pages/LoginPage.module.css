@@ -118,12 +118,6 @@
   box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
 }
 
-.error {
-  color: #C0392B;
-  font-size: 14px;
-  margin: 0 0 20px;
-}
-
 .submitButton {
   width: 100%;
   padding: 16px;

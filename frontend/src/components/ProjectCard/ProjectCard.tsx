@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import { EditProjectModal } from '../EditProjectModal/EditProjectModal'
 import styles from './ProjectCard.module.css'
+import { apiClient } from '../../lib/apiClient'
+import type { Board } from '../../types/kanban';
 
 interface ProjectCardProps {
     id: number
@@ -13,37 +14,20 @@ interface ProjectCardProps {
     animationDelay?: number
 }
 
-interface BoardSummary {
-    id: number
-    project: {id: number}
-}
-
 export function ProjectCard({ id, name, description, isOwner, animationDelay }: ProjectCardProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const { token } = useAuth()
     const queryClient = useQueryClient()
 
-    const {data: boards} = useQuery<BoardSummary[]>({
+    const {data: boards} = useQuery<Board[]>({
         queryKey: ['boards-all'],
-        queryFn: async () => {
-            const response = await fetch('http://localhost:8000/api/boards', {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error(`HTTP ${response.status}`)
-            return response.json()
-        },
+        queryFn: () => apiClient.get<Board[]>('/boards'),
     })
 
     const firstBoard = boards?.filter((b) => b.project.id === id)[0]    
     const linkTo = firstBoard ? `/boards/${firstBoard.id}` : `/projects/${id}`
+
     const deleteMutation = useMutation({
-        mutationFn: async () => {
-            const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error('Proje silinemedi')
-        },
+        mutationFn: () => apiClient.delete(`/projects/${id}`),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects'] })
         },

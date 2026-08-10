@@ -1,0 +1,51 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 80vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.badge {
+  background-color: #FF9B9B;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+  background-size: 10px 10px;
+  padding: 24px 40px;
+  border-radius: 10px;
+  box-shadow: 4px 5px 14px rgba(0, 0, 0, 0.18);
+  transform: rotate(-2deg);
+}
+
+.code {
+  font-family: var(--font-hand);
+  font-size: 56px;
+  margin: 0;
+  color: #2B2B2B;
+}
+
+.message {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  color: #4A3B1A;
+  margin: 4px 0;
+}
+
+.homeLink {
+  font-family: var(--font-hand);
+  padding: 10px 22px;
+  background-color: #A8E6CF;
+  color: #2B2B2B;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.homeLink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}

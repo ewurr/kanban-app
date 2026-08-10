@@ -88,6 +88,16 @@ class Column
         return $this;
     }
 
+    public function getProject(): Project
+    {
+        return $this->getBoard()->getProject();
+    }
+
+    public function getWorkspace(): Workspace
+    {
+        return $this->getProject()->getWorkspace();
+    }
+
     public function getTasks(): Collection
     {
         return $this->tasks;

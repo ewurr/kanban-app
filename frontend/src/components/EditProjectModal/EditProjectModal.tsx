@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import styles from './EditProjectModal.module.css'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage'
 
 interface EditProjectModalProps {
   id: number
@@ -13,26 +14,15 @@ interface EditProjectModalProps {
 export function EditProjectModal({ id, name, description, onClose }: EditProjectModalProps) {
   const [editedName, setEditedName] = useState(name)
   const [editedDescription, setEditedDescription] = useState(description ?? '')
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   const updateMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name: editedName, description: editedDescription || null }),
-      })
-      if (!response.ok) throw new Error('Proje güncellenemedi')
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      onClose()
-    },
+      mutationFn: () =>
+        apiClient.put(`/projects/${id}`, { name: editedName, description: editedDescription || null }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects'] })
+        onClose()
+      },
   })
 
   const handleClose = () => {
@@ -67,6 +57,7 @@ export function EditProjectModal({ id, name, description, onClose }: EditProject
         />
 
         <div className={styles.actions}>
+          {updateMutation.isError && <ErrorMessage message={updateMutation.error.message} />}
           <button
             onClick={() => updateMutation.mutate()}
             disabled={!editedName.trim() || updateMutation.isPending}

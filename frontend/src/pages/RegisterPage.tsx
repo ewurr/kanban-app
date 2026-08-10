@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import styles from './RegisterPage.module.css'
 import { useAuth } from "../AuthContext";
+import { apiClient } from "../lib/apiClient";
+import { ErrorMessage } from "../components/ErrorMessage/ErrorMessage";
 
 export function RegisterPage(){
     const[email, setEmail] = useState('')
@@ -18,18 +20,11 @@ export function RegisterPage(){
         setError(null)
 
         try {
-            const response = await fetch ('http://localhost:8000/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, name, surname }),
-            })
+            const data = await apiClient.post<{ token: string; user: { id: number; email: string; name: string; surname: string } }>(
+                '/register',
+                { email, password, name, surname }
+            )
 
-            const data = await response.json()
-
-            if(!response.ok) {
-                throw new Error(data.error ?? 'An error occurred during registration.')
-            }
-            
             login(data.token, data.user)
             navigate('/')
         } catch (err) {
@@ -59,7 +54,7 @@ export function RegisterPage(){
 
                     <form onSubmit={handleSubmit}>
                         <div className={styles.field}>
-                            <label className={styles.label}>Email</label>
+                            <label className={styles.label}>E-posta</label>
                             <input
                                 type="email" 
                                 value={email}
@@ -70,7 +65,7 @@ export function RegisterPage(){
                         </div>
 
                         <div className={styles.field}>
-                            <label className={styles.label}>Password</label>
+                            <label className={styles.label}>Şifre</label>
                             <div className={styles.passwordWrapper}>
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -90,7 +85,7 @@ export function RegisterPage(){
                         </div>
 
                         <div className={styles.field}>
-                            <label className={styles.label}>Name</label>
+                            <label className={styles.label}>İsim</label>
                             <input  
                                 type="text"
                                 value={name}
@@ -100,7 +95,7 @@ export function RegisterPage(){
                         </div>
 
                         <div className={styles.field}>
-                            <label className={styles.label}>Surname</label>
+                            <label className={styles.label}>Soyad</label>
                             <input  
                                 type="text"
                                 value={surname}
@@ -109,7 +104,7 @@ export function RegisterPage(){
                             />
                         </div>
 
-                        {error && <p className={styles.error}>{error}</p>}
+                        {error && <ErrorMessage message={error}/>}
 
                         <button type="submit" className={styles.submitButton}>
                             Kayıt Ol

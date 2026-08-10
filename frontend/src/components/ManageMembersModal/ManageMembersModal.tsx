@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import type { Workspace } from '../../types/kanban'
 import styles from './ManageMembersModal.module.css'
+import { apiClient, ApiError } from '../../lib/apiClient'
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage'
+import { RoleToggle } from '../RoleToggle/RoleToggle'
 
 interface ManageMembersModalProps {
   workspaceId: number
@@ -13,36 +15,15 @@ export function ManageMembersModal({ workspaceId, onClose }: ManageMembersModalP
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('worker')
   const [error, setError] = useState<string | null>(null)
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   const { data: workspace } = useQuery<Workspace>({
     queryKey: ['workspace', workspaceId],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${workspaceId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
+    queryFn: () => apiClient.get<Workspace>(`/workspaces/${workspaceId}`),
   })
 
   const addMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${workspaceId}/members`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ email, role }),
-      })
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.error ?? 'Üye eklenemedi')
-      }
-      return data
-    },
+    mutationFn: () => apiClient.post(`/workspaces/${workspaceId}/members`, { email, role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] })
       queryClient.invalidateQueries({ queryKey: ['workspaces'] })
@@ -56,31 +37,15 @@ export function ManageMembersModal({ workspaceId, onClose }: ManageMembersModalP
   })
 
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ memberId, newRole }: { memberId: number; newRole: string }) => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${workspaceId}/members/${memberId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ role: newRole }),
-      })
-      if (!response.ok) throw new Error('Rol güncellenemedi')
-      return response.json()
-    },
+    mutationFn: ({ memberId, newRole }: { memberId: number; newRole: string }) =>
+      apiClient.put(`/workspaces/${workspaceId}/members/${memberId}`, { role: newRole }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] })
     },
   })
 
   const removeMemberMutation = useMutation({
-    mutationFn: async (memberId: number) => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${workspaceId}/members/${memberId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error('Üye çıkarılamadı')
-    },
+    mutationFn: (memberId: number) => apiClient.delete(`/workspaces/${workspaceId}/members/${memberId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] })
     },
@@ -109,16 +74,12 @@ export function ManageMembersModal({ workspaceId, onClose }: ManageMembersModalP
           autoFocus
         />
 
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className={styles.select}
-        >
-          <option value="worker">Worker</option>
-          <option value="pm">PM</option>
-        </select>
+        <RoleToggle
+          value={role as 'worker' | 'pm'}
+          onChange={(newRole) => setRole(newRole)}
+        />
 
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <ErrorMessage message={error}/>}
 
         <div className={styles.action}>
           <button
@@ -140,16 +101,15 @@ export function ManageMembersModal({ workspaceId, onClose }: ManageMembersModalP
                   {member.user.name} {member.user.surname}
                 </span>
 
-                <select
-                  value={member.role}
-                  disabled={isOwner || updateRoleMutation.isPending}
-                  onChange={(e) => updateRoleMutation.mutate({ memberId: member.id, newRole: e.target.value })}
-                  className={styles.roleSelect}
-                >
-                  {isOwner && <option value="owner">Owner</option>}
-                  <option value="pm">PM</option>
-                  <option value="worker">Worker</option>
-                </select>
+                {isOwner ? (
+                  <span className={styles.ownerBadge}>Owner</span>
+                ) : (
+                  <RoleToggle
+                    value={member.role as 'worker' | 'pm'}
+                    onChange={(newRole) => updateRoleMutation.mutate({ memberId: member.id, newRole })}
+                    disabled={updateRoleMutation.isPending}
+                  />
+                )}
 
                 <button
                   className={styles.removeButton}

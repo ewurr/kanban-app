@@ -20,9 +20,19 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class ColumnController extends AbstractController
 {
     #[Route('', name: 'app_column_index', methods: ['GET'])]
-    public function index (ColumnRepository $columnRepository, SerializerInterface $serializer): JsonResponse
+    public function index (Request $request, ColumnRepository $columnRepository, SerializerInterface $serializer): JsonResponse
     {
-        $columns = $columnRepository->findAllForUser($this->getUser());
+
+        $boardId = $request->query->get('boardId');
+
+        if($boardId !== null){
+    
+            $columns = $columnRepository->findAllForUserAndBoard($this->getUser(), (int)$boardId);
+        
+        } else {
+        
+            $columns = $columnRepository->findAllForUser($this->getUser());
+        }
 
         $json = $serializer->serialize($columns, 'json', ['groups' => 'column:read']);
 
@@ -48,7 +58,11 @@ final class ColumnController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $board = $entityManager->getRepository(Board::class)->find($data['boardId']);
+        $board = $entityManager->getRepository(Board::class)->find($data['boardId'] ?? null);
+
+        if ($board === null) {
+            return new JsonResponse(['error' => 'Board not found'], 404);
+        }
 
         $this->denyAccessUnlessGranted(WorkspaceVoter::COLUMN_CREATE, $board);
 

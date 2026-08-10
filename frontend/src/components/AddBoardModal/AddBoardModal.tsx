@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import styles from './AddBoardModal.module.css'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage'
 
 interface AddBoardModalProps {
   projectId: number
@@ -10,29 +11,17 @@ interface AddBoardModalProps {
 
 export function AddBoardModal({ projectId, onClose }: AddBoardModalProps) {
   const [name, setName] = useState('')
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('http://localhost:8000/api/boards', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ projectId, name }),
-      })
-      if (!response.ok) throw new Error('Board oluşturulamadı')
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['boards'] })
-      queryClient.invalidateQueries({ queryKey: ['boards-all'] })
-      setName('')
-      onClose()
-    },
-  })
+      mutationFn: () => apiClient.post('/boards', { projectId, name }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['boards'] })
+        queryClient.invalidateQueries({ queryKey: ['boards-all'] })
+        setName('')
+        onClose()
+      },
+    })
 
   return (
     <div className={`${styles.overlay} animate-fade-in`} onClick={onClose}>
@@ -52,6 +41,7 @@ export function AddBoardModal({ projectId, onClose }: AddBoardModalProps) {
         />
 
         <div className={styles.actions}>
+        {mutation.isError && <ErrorMessage message={mutation.error.message} />}
           <button
             onClick={() => mutation.mutate()}
             disabled={!name.trim() || mutation.isPending}

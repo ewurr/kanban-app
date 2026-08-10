@@ -1,0 +1,40 @@
+.errorDark {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: rgba(255, 107, 107, 0.12);
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 10px 0;
+}
+
+.errorDark .text {
+  color: #FF9B9B;
+}
+
+.errorLight {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: rgba(224, 82, 82, 0.08);
+  border: 1px solid rgba(224, 82, 82, 0.35);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 10px 0;
+}
+
+.errorLight .text {
+  color: #C0392B;
+}
+
+.icon {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.text {
+  font-family: var(--font-hand, Georgia, serif);
+  font-size: 13.5px;
+  line-height: 1.4;
+}

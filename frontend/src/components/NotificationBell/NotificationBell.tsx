@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../AuthContext'
 import type { Notification } from '../../types/kanban'
 import styles from './NotificationBell.module.css'
+import { apiClient } from '../../lib/apiClient'
 
 function formatNotificationText(notification: Notification): string {
     const taskTitle = notification.taskTitleSnapshot ?? 'bir görev'
@@ -21,7 +21,6 @@ function formatNotificationText(notification: Notification): string {
 }
 
 export function NotificationBell() {
-    const { token } = useAuth()
     const queryClient = useQueryClient()
     const navigate = useNavigate()
     const [isOpen, setIsOpen] = useState(false)
@@ -29,51 +28,27 @@ export function NotificationBell() {
     const { data: notifications } = useQuery<Notification[]>({
         queryKey: ['notifications'],
         refetchInterval: 60000,
-        queryFn: async () => {
-            const response = await fetch('http://localhost:8000/api/notifications', {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error('Bildirimler yüklenemedi')
-            return response.json()
-        },
+        queryFn: () => apiClient.get<Notification[]>('/notifications'),
     })
 
     const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0
 
     const markAsReadMutation = useMutation({
-        mutationFn: async (notificationId: number) => {
-            const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/read`, {
-                method: 'PATCH',
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error('Bildirim güncellenemedi')
-        },
+        mutationFn: (notificationId: number) => apiClient.patch(`/notifications/${notificationId}/read`),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
         },
     })
 
     const markAllAsReadMutation = useMutation({
-        mutationFn: async () => {
-            const response = await fetch('http://localhost:8000/api/notifications/read-all', {
-                method: 'PATCH',
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error('Bildirimler güncellenemedi')
-        },
+        mutationFn: () => apiClient.patch('/notifications/read-all'),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
         },
     })
 
     const deleteNotificationMutation = useMutation({
-        mutationFn: async (notificationId: number) => {
-            const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}`, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error('Bildirim silinemedi')
-        },
+        mutationFn: (notificationId: number) => apiClient.delete(`/notifications/${notificationId}`),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
         },

@@ -29,18 +29,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180)]
     #[Groups(['workspace:read', 'task:read'])]
-    #[Assert\NotBlank(message: 'The email field is required.')]
-    #[Assert\Email(message: 'The email {{ value }} is not a valid email address.')]
+    #[Assert\NotBlank(message: 'E-posta alanı zorunludur.')]
+    #[Assert\Email(message: '{{ value }} geçerli bir e-posta adresi değil.')]
     private ?string $email = null;
 
     #[ORM\Column(length: 100)]
     #[Groups(['workspace:read', 'task:read', 'activity:read', 'comment:read'])]
-    #[Assert\NotBlank(message: 'The name field is required.')]
+    #[Assert\NotBlank(message: 'İsim alanı zorunludur.')]
     private ?string $name = null;
 
     #[ORM\Column(length: 100)]
     #[Groups(['workspace:read', 'task:read', 'activity:read', 'comment:read'])]
-    #[Assert\NotBlank(message: 'The surname field is required.')]
+    #[Assert\NotBlank(message: 'Soyad alanı zorunludur.')]
     private ?string $surname = null;
 
     /**

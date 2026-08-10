@@ -53,7 +53,40 @@ class TaskRepository extends ServiceEntityRepository
                 ->join('p.workspace', 'w')
                 ->join('w.workspaceMembers', 'wm')
                 ->where('wm.user = :user')
+                ->andWhere(
+                    '(wm.role = :owner) OR EXISTS (
+                        SELECT 1 FROM App\Entity\TaskAssignment ta
+                        WHERE ta.task = t AND ta.user = :user
+                    )'
+                )
                 ->setParameter('user', $user)
+                ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER)
+                ->getQuery()
+                ->getResult();
+    }
+
+    /**
+     * @return Task[]
+     */
+    public function findAllForUserAndBoard(User $user, int $boardId): array
+    {
+        return $this->createQueryBuilder('t')
+                ->join('t.column', 'c')
+                ->join('c.board', 'b')
+                ->join('b.project', 'p')
+                ->join('p.workspace', 'w')
+                ->join('w.workspaceMembers', 'wm')
+                ->where('wm.user = :user')
+                ->andWhere('b.id = :boardId')
+                ->andWhere(
+                    '(wm.role = :owner) OR EXISTS (
+                        SELECT 1 FROM App\Entity\TaskAssignment ta
+                        WHERE ta.task = t AND ta.user = :user
+                    )'
+                )
+                ->setParameter('user', $user)
+                ->setParameter('boardId', $boardId)
+                ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER)
                 ->getQuery()
                 ->getResult();
     }

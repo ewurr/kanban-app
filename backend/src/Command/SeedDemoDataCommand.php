@@ -119,6 +119,7 @@ class SeedDemoDataCommand extends Command
                 $task->setPriority($priority);
                 $task->setPosition($index);
                 $task->setColumn($columns[array_rand($columns)]);
+                $task->setColor('#FFD93D');
                 $this->entityManager->persist($task);
 
                 $assigneeCount = random_int(1, 2);

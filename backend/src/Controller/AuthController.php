@@ -38,7 +38,7 @@ final class AuthController extends AbstractController
         // 2. şifre uzunluk kontrolü (hash'lenmeden önce, çünkü hash her zaman uzun olur)
         $plainPassword = $data['password'] ?? '';
         if(strlen($plainPassword) < 8) {
-            return new JsonResponse(['error' => 'Password must be at least 8 characters long.'], 400);
+            return new JsonResponse(['error' => 'Şifre en az 8 karakter olmalıdır.'], 400);
         }
 
         // 3. yeni user oluştur

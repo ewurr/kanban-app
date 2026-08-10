@@ -71,12 +71,6 @@
   cursor: not-allowed;
 }
 
-.error {
-  color: #ff8a8a;
-  font-size: 13px;
-  margin: 14px 0 0 0;
-}
-
 .success {
   color: #8aff9e;
   font-size: 13px;

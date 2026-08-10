@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import styles from './AddProjectModal.module.css'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage'
 
 interface AddProjectModalProps {
   workspaceId: number
@@ -11,33 +12,18 @@ interface AddProjectModalProps {
 export function AddProjectModal({ workspaceId, onClose }: AddProjectModalProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('http://localhost:8000/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          workspaceId,
-          name,
-          description: description || null,
-        }),
-      })
-      if (!response.ok) throw new Error('Proje oluşturulamadı')
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      setName('')
-      setDescription('')
-      onClose()
-    },
-  })
+      mutationFn: () =>
+        apiClient.post('/projects', { workspaceId, name, description: description || null }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects'] })
+        setName('')
+        setDescription('')
+        onClose()
+      },
+    })
 
   const handleClose = () => {
     if(mutation.isPending) return
@@ -71,6 +57,7 @@ export function AddProjectModal({ workspaceId, onClose }: AddProjectModalProps) 
         />
 
         <div className={styles.actions}>
+        {mutation.isError && <ErrorMessage message={mutation.error.message} />}
           <button
             onClick={() => mutation.mutate()}
             disabled={!name.trim() || mutation.isPending}

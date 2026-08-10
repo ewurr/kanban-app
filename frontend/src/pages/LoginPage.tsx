@@ -2,6 +2,9 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import styles from './LoginPage.module.css'
+import { apiClient } from '../lib/apiClient'
+import type { User } from '../AuthContext'
+import { ErrorMessage } from '../components/ErrorMessage/ErrorMessage'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -11,6 +14,7 @@ export function LoginPage() {
   const [isVisible, setIsVisible] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  
 
   useEffect(() => {
     setIsVisible(true)
@@ -21,30 +25,19 @@ export function LoginPage() {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:8000/api/login_check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
+      const data = await apiClient.post<{ token: string}> ('/login_check', { email, password })
 
-      if (!response.ok) {
-        throw new Error('Email veya şifre hatalı')
-      }
+      // login() henüz çağrılmadı, bu yüzden token'ı localStorage'a burada elle yazıyoruz —
+      // apiClient bir sonraki çağrıda (`/me`) bu token'ı okuyabilsin diye.
 
-      const data = await response.json()
-
-      const meResponse = await fetch('http://localhost:8000/api/me', {
-        headers: { Authorization: `Bearer ${data.token}` },
-      })
-      const user = await meResponse.json()
+      localStorage.setItem('token', data.token)
+      const user = await apiClient.get<User>('/me')    
 
       login(data.token, user)
       navigate('/')
       
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      }
+        setError('Email veya şifre hatalı')
     }
   }
 
@@ -88,7 +81,7 @@ export function LoginPage() {
               </div>
             </div>
 
-            {error && <p className={styles.error}>{error}</p>}
+            {error && <ErrorMessage message={error}/>}
 
             <button type="submit" className={styles.submitButton}>
               Giriş yap

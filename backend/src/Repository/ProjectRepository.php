@@ -64,4 +64,31 @@ class ProjectRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return Project[]
+     */
+    public function findAllForUserAndWorkspace(User $user, int $workspaceId): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.workspace', 'w')
+            ->join('w.workspaceMembers', 'wm')
+            ->where('wm.user = :user')
+            ->andWhere('w.id = :workspaceId')
+            ->andWhere(
+                '(wm.role = :owner) OR EXISTS (
+                    SELECT 1 FROM App\Entity\TaskAssignment ta
+                    JOIN ta.task t
+                    JOIN t.column c
+                    JOIN c.board b
+                    WHERE b.project = p AND ta.user = :user
+                )'
+            )
+            ->setParameter('user', $user)
+            ->setParameter('workspaceId', $workspaceId)
+            ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER)
+            ->getQuery()
+            ->getResult();
+    }
+
 }

@@ -23,9 +23,15 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class BoardController extends AbstractController
 {
     #[Route('', name: 'app_board_index', methods: ['GET'])]
-    public function index (BoardRepository $boardRepository, SerializerInterface $serializer): JsonResponse
+    public function index (Request $request, BoardRepository $boardRepository, SerializerInterface $serializer): JsonResponse
     {
-        $boards = $boardRepository->findAllForUser($this->getUser());
+        $projectId = $request->query->get('projectId');
+
+        if($projectId !== null){
+            $boards = $boardRepository->findAllForUserAndProject($this->getUser(), (int)$projectId);
+        } else {
+            $boards = $boardRepository->findAllForUser($this->getUser());
+        }
 
         $json = $serializer->serialize($boards, 'json', ['groups' => 'board:read']);
 
@@ -51,7 +57,11 @@ final class BoardController extends AbstractController
     ) : JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $project = $entityManager->getRepository(Project::class)->find($data['projectId']);
+        $project = $entityManager->getRepository(Project::class)->find($data['projectId'] ?? null);
+
+        if ($project === null) {
+            return new JsonResponse(['error' => 'Project not found'], 404);
+        }
 
         $this->denyAccessUnlessGranted(WorkspaceVoter::BOARD_CREATE, $project);
 

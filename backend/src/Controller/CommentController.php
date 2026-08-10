@@ -30,7 +30,7 @@ final class CommentController extends AbstractController
         $task = $entityManager->getRepository(Task::class)->find($taskId);
 
         if ($task === null) {
-            return new JsonResponse(['error' => 'Task not found'], 404);
+            return new JsonResponse(['error' => 'Görev bulunamadı.'], 404);
         }
 
         $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_VIEW, $task);
@@ -54,7 +54,7 @@ final class CommentController extends AbstractController
         $task = $entityManager->getRepository(Task::class)->find($taskId);
 
         if ($task === null) {
-            return new JsonResponse(['error' => 'Task not found'], 404);
+            return new JsonResponse(['error' => 'Görev bulunamadı.'], 404);
         }
 
         $this->denyAccessUnlessGranted(WorkspaceVoter::WORKSPACE_VIEW, $task);
@@ -101,7 +101,7 @@ final class CommentController extends AbstractController
         $comment = $commentRepository->find($commentId);
 
         if ($comment === null || $comment->getTask()->getId() !== $taskId) {
-            return new JsonResponse(['error' => 'Comment not found'], 404);
+            return new JsonResponse(['error' => 'Yorum bulunamadı.'], 404);
         }
 
         $this->denyAccessUnlessGranted(CommentVoter::COMMENT_EDIT, $comment);
@@ -142,7 +142,7 @@ final class CommentController extends AbstractController
         $comment = $commentRepository->find($commentId);
 
         if ($comment === null || $comment->getTask()->getId() !== $taskId) {
-            return new JsonResponse(['error' => 'Comment not found'], 404);
+            return new JsonResponse(['error' => 'Yorum bulunamadı.'], 404);
         }
 
         $this->denyAccessUnlessGranted(CommentVoter::COMMENT_DELETE, $comment);

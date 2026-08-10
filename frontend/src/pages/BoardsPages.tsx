@@ -3,63 +3,32 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../AuthContext";
 import { BoardCard } from "../components/BoardCard/BoardCard"
 import { AddBoardCard } from "../components/AddBoardCard/AddBoardCard"
+import { apiClient } from '../lib/apiClient'
+import { LoadingState } from "../components/LoadingState/LoadingState";
+import type { Board, Project } from '../types/kanban'
 
-interface Board {
-    id: number
-    name: string
-    project: {
-        id: number
-        name: string
-    }
-}
-
-interface Project {
-    id: number
-    workspace: {
-        id: number
-    }
-}
 
 export function BoardsPage(){
     const { id } = useParams()
-    const { token, user } = useAuth()
+    const { user } = useAuth()
     
     const {data, isLoading, error} = useQuery<Board[]>({
         queryKey: ['boards', id],
-        queryFn: async () => {
-            const response = await fetch ('http://localhost:8000/api/boards', {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-
-            if(!response.ok) throw new Error(`HTTP ${response.status}`)
-                return response.json()
-        },
+        queryFn: () => apiClient.get<Board[]>('/boards'),
     })
 
     const { data: project } = useQuery<Project>({
         queryKey: ['project', id],
-        queryFn: async () => {
-            const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error(`HTTP ${response.status}`)
-            return response.json()
-        },
+        queryFn: () => apiClient.get<Project>(`/projects/${id}`),
     })
 
     const { data: workspace } = useQuery<{ workspaceMembers: { user: { id: number }; role: string }[] }>({
         queryKey: ['workspace', project?.workspace.id],
         enabled: !!project,
-        queryFn: async () => {
-            const response = await fetch(`http://localhost:8000/api/workspaces/${project?.workspace.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error(`HTTP ${response.status}`)
-            return response.json()
-        },
+        queryFn: () => apiClient.get(`/workspaces/${project?.workspace.id}`),
     })
 
-    if (isLoading) return <p>Yükleniyor...</p>
+    if (isLoading) return <LoadingState/>
     if(error) return <p>Hata: {error.message}</p>
 
     const filteredBoards = data?.filter((board) => board.project.id === Number(id))

@@ -7,15 +7,20 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Column;
-use App\Entity\User;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Entity\Column;
+use App\Entity\User;
+use App\Entity\Project;
+use App\Entity\Workspace;
 
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 class Task
 {
+
+    public const DUE_SOON_THRESHOLD_DAYS = 1;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -124,6 +129,29 @@ class Task
         return $this;
     }
 
+    #[Groups(['task:read'])]
+    public function getDueDateStatus(): ?string
+    {
+        if($this->dueDate === null) {
+            return null;
+        }
+
+        $now = new \DateTimeImmutable();
+        $threshold = $now->modify(sprintf('+%d days', self::DUE_SOON_THRESHOLD_DAYS));
+    
+        if($this->dueDate < $now){
+            return 'overdue';
+        }
+
+        if($this->dueDate <= $threshold) {
+            return 'soon';
+        }
+
+        return null;
+        
+    }
+
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -151,6 +179,16 @@ class Task
     {
         $this->column = $column;
         return $this;
+    }
+
+    public function getProject(): Project
+    {
+        return $this->getColumn()->getBoard()->getProject();
+    }
+
+    public function getWorkspace(): Workspace
+    {
+        return $this->getProject()->getWorkspace();
     }
 
     public function getColor(): ?string

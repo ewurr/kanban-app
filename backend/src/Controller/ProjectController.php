@@ -22,9 +22,15 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class ProjectController extends AbstractController
 {
     #[Route('', name: 'app_project_index', methods: ['GET'])]
-    public function index (ProjectRepository $projectRepository, SerializerInterface $serializer): JsonResponse
+    public function index (Request $request, ProjectRepository $projectRepository, SerializerInterface $serializer): JsonResponse
     {
-        $projects = $projectRepository->findAllForUser($this->getUser());
+        $workspaceId = $request->query->get('workspaceId');
+
+        if($workspaceId !== null){
+            $projects = $projectRepository->findAllForUserAndWorkspace($this->getUser(), (int)$workspaceId);
+        } else {
+            $projects = $projectRepository->findAllForUser($this->getUser());
+        }
 
         $json = $serializer->serialize($projects, 'json', ['groups' => 'project:read']);
 

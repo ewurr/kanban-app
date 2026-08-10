@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import { BoardCard } from '../BoardCard/BoardCard'
 import { AddBoardCard } from '../AddBoardCard/AddBoardCard'
 import styles from './BoardSelectorModal.module.css'
+import { apiClient } from '../../lib/apiClient'
+import type { Board } from '../../types/kanban'
 
 interface BoardSelectorModalProps {
   projectId: number
@@ -10,24 +11,12 @@ interface BoardSelectorModalProps {
   onClose: () => void
 }
 
-interface Board {
-  id: number
-  name: string
-  project: { id: number }
-}
 
 export function BoardSelectorModal({ projectId, canManage, onClose }: BoardSelectorModalProps) {
-  const { token } = useAuth()
 
   const { data: boards } = useQuery<Board[]>({
-    queryKey: ['boards-all'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/boards', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
+      queryKey: ['boards-all'],
+      queryFn: () => apiClient.get<Board[]>('/boards'),
   })
 
   const boardsInProject = boards?.filter((b) => b.project.id === projectId) ?? []

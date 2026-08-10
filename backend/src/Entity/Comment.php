@@ -61,6 +61,11 @@ class Comment
         return $this;
     }
 
+    public function getWorkspace(): Workspace
+    {
+        return $this->getTask()->getWorkspace();
+    }
+
     public function getContent(): ?string
     {
         return $this->content;

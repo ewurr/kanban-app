@@ -129,9 +129,7 @@ final class WorkspaceVoter extends Voter
         return match (true) {
             $subject instanceof Workspace => $subject,
             $subject instanceof Project => $subject->getWorkspace(),
-            $subject instanceof Board => $subject->getProject()->getWorkspace(),
-            $subject instanceof Column => $subject->getBoard()->getProject()->getWorkspace(),
-            $subject instanceof Task => $subject->getColumn()->getBoard()->getProject()->getWorkspace(),
+            $subject instanceof Board, $subject instanceof Column, $subject instanceof Task => $subject->getWorkspace(),
         };
     }
 
@@ -140,8 +138,8 @@ final class WorkspaceVoter extends Voter
         return match (true) {
             $subject instanceof Project => $subject,
             $subject instanceof Board => $subject->getProject(),
-            $subject instanceof Column => $subject->getBoard()->getProject(),
-            $subject instanceof Task => $subject->getColumn()->getBoard()->getProject(),
+            $subject instanceof Column, $subject instanceof Task => $subject->getProject(),
         };
     }
+
 }

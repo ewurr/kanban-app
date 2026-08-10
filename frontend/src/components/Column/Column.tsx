@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import type { Column as ColumnType, Task as TaskType } from '../../types/kanban'
 import { Task } from '../Task/Task'
 import styles from './Column.module.css'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage'
 
 interface ColumnProps {
   column: ColumnType
@@ -15,39 +16,21 @@ interface ColumnProps {
 export function Column({ column, tasks, workspaceId, canManage }: ColumnProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState(column.name)
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   const updateMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/columns/${column.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name: editedName }),
-      })
-      if (!response.ok) throw new Error('Column güncellenemedi')
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['columns'] })
-      setIsEditing(false)
-    },
+      mutationFn: () => apiClient.put(`/columns/${column.id}`, { name: editedName }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['columns'] })
+        setIsEditing(false)
+      },
   })
 
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/columns/${column.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error('Column silinemedi')
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['columns'] })
-    },
+      mutationFn: () => apiClient.delete(`/columns/${column.id}`),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['columns'] })
+      },
   })
 
   const handleDelete = () => {
@@ -69,6 +52,7 @@ export function Column({ column, tasks, workspaceId, canManage }: ColumnProps) {
             className={styles.editInput}
             autoFocus
           />
+          {updateMutation.isError && <ErrorMessage message={updateMutation.error.message} />}
           <button
             onClick={() => updateMutation.mutate()}
             disabled={!editedName.trim() || updateMutation.isPending}
@@ -88,6 +72,8 @@ export function Column({ column, tasks, workspaceId, canManage }: ColumnProps) {
           </div>
         </div>
       )}
+      
+      {deleteMutation.isError && <ErrorMessage message={deleteMutation.error.message} />}
 
       <div className={styles.taskList}>
           {tasks.map((task, index) => (

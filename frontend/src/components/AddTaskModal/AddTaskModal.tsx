@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../AuthContext'
 import type { Column as ColumnType, Task as TaskType } from '../../types/kanban'
 import styles from './AddTaskModal.module.css'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage'
 
 interface AddTaskModalProps {
   boardId: number
@@ -22,7 +24,6 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
   const [dueDate, setDueDate] = useState('')
   const [columnId, setColumnId] = useState<number | ''>(columnsInBoard[0]?.id ?? '')
   const [randomColor] = useState(() => POST_IT_COLORS[Math.floor(Math.random() * POST_IT_COLORS.length)])
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   const today = new Date().toISOString().slice(0, 10)
@@ -31,30 +32,21 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
   const nextPosition = tasksInSelectedColumn.length
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('http://localhost:8000/api/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          columnId,
-          title,
-          description: description || null,
-          priority,
-          position: nextPosition,
-          dueDate: dueDate || null,
-          color: randomColor,
-        }),
-      })
-      if (!response.ok) throw new Error('Task oluşturulamadı')
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      onClose()
-    },
+    mutationFn: () => 
+      apiClient.post('/tasks', {
+        columnId,
+        title,
+        description: description || null,
+        priority,
+        position: nextPosition,
+        dueDate: dueDate || null,
+        color: randomColor,
+      }),
+
+      onSuccess: () => {
+        queryClient.invalidateQueries ({ queryKey: ['tasks']})
+      }
+
   })
 
   return (
@@ -111,6 +103,7 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
         />
 
         <div className={styles.actions}>
+          {mutation.isError && <ErrorMessage message={mutation.error.message} />}
           <button
             onClick={() => mutation.mutate()}
             disabled={!title.trim() || !columnId || mutation.isPending}

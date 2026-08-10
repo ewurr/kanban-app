@@ -23,6 +23,18 @@ services:
     depends_on:
       - postgres
 
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kanban_scheduler
+    volumes:
+      - ./backend:/app
+    command: sh docker/scheduler.sh
+    depends_on:
+      - postgres
+      - backend
+
   frontend:
     build:
       context: ./frontend

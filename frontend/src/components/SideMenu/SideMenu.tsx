@@ -1,29 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
-import type { Workspace, Task as TaskType, Board as BoardType } from '../../types/kanban'
+import type { Workspace, Task as TaskType, Board as BoardType, Project, Column, Board } from '../../types/kanban'
 import styles from './SideMenu.module.css'
+import { apiClient } from '../../lib/apiClient'
+import { useAuth } from '../../AuthContext'
 
 interface SideMenuProps {
   onClose: () => void
-}
-
-interface Project {
-  id: number
-  name: string
-  workspace: { id: number }
-}
-
-interface BoardSummary {
-  id: number
-  name: string
-  project: { id: number }
-}
-
-interface Column {
-  id: number
-  name: string
-  board: { id: number }
 }
 
 const COLUMN_ORDER: Record<string, number> = {
@@ -45,8 +28,9 @@ function getColumnColor(columnName: string): string {
 }
 
 export function SideMenu({ onClose }: SideMenuProps) {
-    const { token, user } = useAuth()
     const location = useLocation()
+
+    const { user } = useAuth()
 
     const workspaceRouteMatch = location.pathname.match(/^\/workspaces\/(\d+)/)
     const workspaceIdFromRoute = workspaceRouteMatch ? Number(workspaceRouteMatch[1]) : null
@@ -61,96 +45,64 @@ export function SideMenu({ onClose }: SideMenuProps) {
     const { data: board } = useQuery<BoardType>({
         queryKey: ['sidemenu-board', boardIdFromUrl],
         enabled: boardIdFromUrl !== null,
-        queryFn: async () => {
-        const response = await fetch(`http://localhost:8000/api/boards/${boardIdFromUrl}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json()
-        },
+        queryFn: () => apiClient.get<BoardType>(`/boards/${boardIdFromUrl}`),
     })
 
     // Nihai project/workspace id'leri: ya doğrudan URL'den, ya da board üzerinden
     const projectIdFromUrl = projectIdFromRoute ?? board?.project.id ?? null
-    const workspaceIdFromUrl = workspaceIdFromRoute ?? board?.project.workspace.id ?? null
+    
+    const { data: projectForWorkspace } = useQuery<{ workspace: { id: number } }>({
+        queryKey: ['sidemenu-project', projectIdFromUrl],
+        enabled: projectIdFromUrl !== null && workspaceIdFromRoute === null && !board,
+        queryFn: () => apiClient.get(`/projects/${projectIdFromUrl}`)
+    })
+
+    const workspaceIdFromUrl = workspaceIdFromRoute ?? board?.project.workspace.id ?? projectForWorkspace?.workspace.id ?? null
 
     const { data: workspaces } = useQuery<Workspace[]>({
         queryKey: ['workspaces'],
-        queryFn: async () => {
-        const response = await fetch('http://localhost:8000/api/workspaces', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json()
-        },
+        queryFn: () => apiClient.get<Workspace[]>('/workspaces'),
     })
 
     const { data: projects } = useQuery<Project[]>({
-        queryKey: ['projects-all'],
+        queryKey: ['projects-all', workspaceIdFromUrl],
         enabled: workspaceIdFromUrl !== null,
-        queryFn: async () => {
-        const response = await fetch('http://localhost:8000/api/projects', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json()
-        },
+        queryFn: () => apiClient.get<Project[]>(`/projects?workspaceId=${workspaceIdFromUrl}`),
     })
 
-    const { data: boards } = useQuery<BoardSummary[]>({
-        queryKey: ['boards-all'],
+    const { data: boards } = useQuery<Board[]>({
+        queryKey: ['boards-all', projectIdFromUrl],
         enabled: projectIdFromUrl !== null,
-        queryFn: async () => {
-        const response = await fetch('http://localhost:8000/api/boards', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json()
-        },
+        queryFn: () => apiClient.get<Board[]>(`/boards?projectId=${projectIdFromUrl}`),
     })
 
     const { data: columns } = useQuery<Column[]>({
         queryKey: ['columns-all', boardIdFromUrl],
         enabled: boardIdFromUrl !== null,
-        queryFn: async () => {
-        const response = await fetch('http://localhost:8000/api/columns', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json()
-        },
+        queryFn: () => apiClient.get<Column[]>(`/columns?boardId=${boardIdFromUrl}`),
     })
 
     const { data: tasks } = useQuery<TaskType[]>({
         queryKey: ['tasks-all', boardIdFromUrl],
         enabled: boardIdFromUrl !== null,
-        queryFn: async () => {
-        const response = await fetch('http://localhost:8000/api/tasks', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json()
-        },
+        queryFn: () => apiClient.get<TaskType[]>(`/tasks?boardId=${boardIdFromUrl}`),
     })
 
-        const projectsInWorkspace = projects?.filter((p) => p.workspace.id === workspaceIdFromUrl)
-        const boardsInProject = boards?.filter((b) => b.project.id === projectIdFromUrl)
-        const columnsInBoard = columns?.filter((c) => c.board.id === boardIdFromUrl)
-        const columnIdsInBoard = columnsInBoard?.map((c) => c.id) ?? []
-        const myTasks = tasks?.filter(
-        (t) => columnIdsInBoard.includes(t.column.id) && t.assignments.some((a) => a.user.id === user?.id)
-        )
+        const projectsInWorkspace = projects
+        const boardsInProject = boards
+        const columnsInBoard = columns
+        const myTasks = tasks?.filter((t) => t.assignments.some((a) => a.user.id === user?.id))
 
         const sortedMyTasks = myTasks?.slice().sort((a, b) => {
-        const columnA = columnsInBoard?.find((c) => c.id === a.column.id)
-        const columnB = columnsInBoard?.find((c) => c.id === b.column.id)
-        return getColumnOrder(columnA?.name ?? '') - getColumnOrder(columnB?.name ?? '')
+            const columnA = columnsInBoard?.find((c) => c.id === a.column.id)
+            const columnB = columnsInBoard?.find((c) => c.id === b.column.id)
+            return getColumnOrder(columnA?.name ?? '') - getColumnOrder(columnB?.name ?? '')
         })
 
     return (
         <div className={styles.overlay} onClick={onClose}>
         <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
-            <Link to="/" className={styles.homeLink} onClick={onClose}>
+            <Link to="/" className={styles.homeLink}>
             🏠 Ana Sayfa
             </Link>
 
@@ -160,8 +112,7 @@ export function SideMenu({ onClose }: SideMenuProps) {
                 <Link
                 key={workspace.id}
                 to={`/workspaces/${workspace.id}`}
-                className={styles.itemLink}
-                onClick={onClose}
+                className={workspace.id === workspaceIdFromUrl ? styles.itemLinkActive : styles.itemLink}
                 >
                 {workspace.name}
                 </Link>
@@ -176,8 +127,7 @@ export function SideMenu({ onClose }: SideMenuProps) {
                     <Link
                     key={project.id}
                     to={`/projects/${project.id}`}
-                    className={styles.itemLink}
-                    onClick={onClose}
+                    className={project.id === projectIdFromUrl ? styles.itemLinkActive : styles.itemLink}
                     >
                     {project.name}
                     </Link>
@@ -194,8 +144,7 @@ export function SideMenu({ onClose }: SideMenuProps) {
                     <Link
                     key={b.id}
                     to={`/boards/${b.id}`}
-                    className={styles.itemLink}
-                    onClick={onClose}
+                    className={b.id === boardIdFromUrl ? styles.itemLinkActive : styles.itemLink}
                     >
                     {b.name}
                     </Link>

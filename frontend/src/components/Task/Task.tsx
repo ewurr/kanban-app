@@ -16,23 +16,12 @@ function getPriorityColor(priority: string): string {
     return 'transparent'
 }
 
-function getDueDateStatus(dueDate: string | null): 'overdue' | 'soon' | null {
-    if (!dueDate) return null
-
-    const now = new Date()
-    const due = new Date(dueDate)
-    const oneDayMs = 24 * 60 * 60 * 1000
-
-    if (due.getTime() < now.getTime()) return 'overdue'
-    if (due.getTime() - now.getTime() <= oneDayMs) return 'soon'
-    return null
-}
-
 export function Task({ task, workspaceId, animationDelay }: TaskProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const rotation = (task.id % 5) - 2
     const priorityColor = getPriorityColor(task.priority)
-    const dueDateStatus = getDueDateStatus(task.dueDate)
+ 
+    const dueDateStatus = task.dueDateStatus
 
     return (
         <>

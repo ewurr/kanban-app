@@ -4,46 +4,26 @@ import { useAuth } from "../AuthContext"
 import { ProjectCard } from "../components/ProjectCard/ProjectCard"
 import { AddProjectCard } from "../components/AddProjectCard/AddProjectCard"
 import { AddMemberCard } from '../components/AddMemberCard/AddMemberCard'
+import { apiClient } from '../lib/apiClient'
+import { LoadingState } from "../components/LoadingState/LoadingState"
+import type { Project } from "../types/kanban"
 
-interface Project {
-    id: number
-    name: string
-    description: string | null
-    workspace: {
-        id: number
-        name: string
-    }
-}
 
 export function ProjectsPage(){
     const {id} = useParams()
-    const {token, user} = useAuth()
+    const { user} = useAuth()
 
     const {data, isLoading, error} = useQuery<Project[]> ({
         queryKey: ['projects', id],
-        queryFn: async () => {
-            const response = await fetch('http://localhost:8000/api/projects', {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if(!response.ok){
-                throw new Error(`HTTP ${response.status}`)
-            }
-            return response.json()
-        },
+        queryFn: () => apiClient.get<Project[]>('/projects'),
     })
 
     const { data: workspace } = useQuery<{ workspaceMembers: { user: { id: number }; role: string }[] }>({
         queryKey: ['workspace', id],
-        queryFn: async () => {
-            const response = await fetch(`http://localhost:8000/api/workspaces/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!response.ok) throw new Error(`HTTP ${response.status}`)
-            return response.json()
-        },
+        queryFn: () => apiClient.get(`/workspaces/${id}`),
     })
 
-    if(isLoading) return <p>Yükleniyor...</p>
+    if(isLoading) return <LoadingState/>
     if(error) return <p>Hata: {error.message}</p>
 
     const filteredProjects = data?.filter((project) => project.workspace.id === Number(id))

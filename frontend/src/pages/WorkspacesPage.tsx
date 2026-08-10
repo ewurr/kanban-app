@@ -3,28 +3,20 @@ import { useAuth } from '../AuthContext'
 import { WorkspaceCard } from '../components/WorkspaceCard/WorkspaceCard'
 import type { Workspace } from '../types/kanban'
 import { AddWorkspaceCard } from '../components/AddWorkspaceCard/AddWorkspaceCard'
+import { apiClient } from '../lib/apiClient'
+import { LoadingState } from '../components/LoadingState/LoadingState'
 
 
 export function WorkspacesPage() {
-  const { token, user, logout } = useAuth()
+  const { user } = useAuth()
 
   const { data, isLoading, error } = useQuery<Workspace[]>({
     queryKey: ['workspaces'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/workspaces', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-      return response.json()
-    },
+    queryFn: () => apiClient.get<Workspace[]>('/workspaces'),
   })
 
   if (isLoading) {
-    return <p>Yükleniyor...</p>
+    return <LoadingState message="Panolar hazırlanıyor..." />
   }
 
   if (error) {

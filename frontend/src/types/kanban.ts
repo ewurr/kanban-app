@@ -17,6 +17,7 @@ export interface Task {
   priority: string
   color: string
   dueDate: string | null
+  dueDateStatus: 'overdue' | 'soon' | null
   createdAt: string
   position: number
   column: {
@@ -92,4 +93,14 @@ export interface Notification {
       }
     }
   } | null
+}
+
+export interface Project {
+  id: number
+  name: string
+  description: string | null
+  workspace: {
+    id: number
+    name: string
+  }
 }

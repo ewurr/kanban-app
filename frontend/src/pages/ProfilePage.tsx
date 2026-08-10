@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../AuthContext'
+import { useAuth, type User } from '../AuthContext'
 import styles from './ProfilePage.module.css'
+import { apiClient } from '../lib/apiClient'
+import { ErrorMessage } from '../components/ErrorMessage/ErrorMessage'
 
 export function ProfilePage() {
-  const { user, token, updateUser } = useAuth()
+  const { user, updateUser } = useAuth()
   const queryClient = useQueryClient()
 
   const [name, setName] = useState(user?.name ?? '')
@@ -19,21 +21,7 @@ export function ProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false)
 
   const profileMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('http://localhost:8000/api/me', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, surname }),
-      })
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.errors?.[0] ?? 'Profil güncellenemedi')
-      }
-      return data
-    },
+    mutationFn: () => apiClient.put<User>('/me', { name, surname }),
     onSuccess: (data) => {
       updateUser(data)
       queryClient.invalidateQueries({ queryKey: ['workspaces'] })
@@ -48,21 +36,7 @@ export function ProfilePage() {
   })
 
   const passwordMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('http://localhost:8000/api/me/password', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      })
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.error ?? 'Şifre değiştirilemedi')
-      }
-      return data
-    },
+    mutationFn: () => apiClient.put('/me/password', { currentPassword, newPassword }),
     onSuccess: () => {
       setPasswordError(null)
       setPasswordSuccess(true)
@@ -112,7 +86,7 @@ export function ProfilePage() {
             className={styles.input}
           />
 
-          {profileError && <p className={styles.error}>{profileError}</p>}
+          {profileError && <ErrorMessage message={profileError}/>}
           {profileSuccess && <p className={styles.success}>Profil güncellendi.</p>}
 
           <button
@@ -151,7 +125,7 @@ export function ProfilePage() {
             className={styles.input}
           />
 
-          {passwordError && <p className={styles.error}>{passwordError}</p>}
+          {passwordError && <ErrorMessage message={passwordError}/>}
           {passwordSuccess && <p className={styles.success}>Şifre başarıyla değiştirildi.</p>}
 
           <button

@@ -12,8 +12,6 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class NotificationService
 {
-    private const DUE_SOON_THRESHOLD_DAYS = 1;
-
     public function __construct(
         private EntityManagerInterface $entityManager,
         private NotificationRepository $notificationRepository,
@@ -37,7 +35,7 @@ class NotificationService
         $assignments = $this->taskAssignmentRepository->findByUser($user);
 
         $now = new \DateTimeImmutable();
-        $threshold = $now->modify(sprintf('+%d days', self::DUE_SOON_THRESHOLD_DAYS));
+        $threshold = $now->modify(sprintf('+%d days', Task::DUE_SOON_THRESHOLD_DAYS));
 
         $hasNewNotifications = false;
 
@@ -60,10 +58,6 @@ class NotificationService
                     $hasNewNotifications = true;
                 }
             }
-        }
-
-        if ($hasNewNotifications) {
-            $this->entityManager->flush();
         }
     }
 

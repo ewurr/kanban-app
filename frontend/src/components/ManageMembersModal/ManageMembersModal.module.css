@@ -96,13 +96,8 @@
   color: #ffffff;
 }
 
-.error {
-  color: #ff8a8a;
-  font-size: 12px;
-  margin: -4px 0 10px 0;
-}
-
 .action {
+  margin-top: 24px;
   margin-bottom: 8px;
 }
 
@@ -189,4 +184,11 @@
 .removeButton:disabled {
   color: rgba(255, 255, 255, 0.2);
   cursor: not-allowed;
+}
+
+.ownerBadge {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: #FFD93D;
+  font-weight: 600;
 }

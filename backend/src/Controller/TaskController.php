@@ -26,9 +26,15 @@ use App\Service\NotificationService;
 final class TaskController extends AbstractController
 {
     #[Route('', name: 'app_task_index', methods: ['GET'])]
-    public function index (TaskRepository $taskRepository, SerializerInterface $serializer): JsonResponse
+    public function index (Request $request, TaskRepository $taskRepository, SerializerInterface $serializer): JsonResponse
     {
-        $tasks = $taskRepository->findAllForUser($this->getUser());
+        $boardId = $request->query->get('boardId');
+
+        if($boardId !== null) {
+            $tasks = $taskRepository->findAllForUserAndBoard($this->getUser(), (int)$boardId);
+        } else {
+            $tasks = $taskRepository->findAllForUser($this->getUser());
+        }
 
         $json = $serializer->serialize($tasks, 'json', ['groups' => 'task:read']);
 
@@ -55,7 +61,11 @@ final class TaskController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $column = $entityManager->getRepository(Column::class)->find($data['columnId']);
+        $column = $entityManager->getRepository(Column::class)->find($data['columnId'] ?? null);
+
+        if ($column === null) {
+            return new JsonResponse(['error' => 'Column not found'], 404);
+        }
 
         $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_CREATE, $column);
 
@@ -191,14 +201,14 @@ final class TaskController extends AbstractController
         $user = $entityManager->getRepository(User::class)->find($data['userId'] ?? null);
 
         if($user === null) {
-            return new JsonResponse(['error' => 'User not found'], 404);
+            return new JsonResponse(['error' => 'Kullanıcı bulunamadı.'], 404);
         }
 
         $existingAssignment = $entityManager->getRepository(TaskAssignment::class)
             ->findOneBy(['task' => $task, 'user' => $user]);
     
         if($existingAssignment !== null){
-            return new JsonResponse(['error' => 'This user is already assigned to this task.'], 409);
+            return new JsonResponse(['error' => 'Bu kullanıcı zaten bu göreve atanmış.'], 404);
         }
 
         $assignment = new TaskAssignment();
@@ -240,14 +250,14 @@ final class TaskController extends AbstractController
         $user = $entityManager->getRepository(User::class)->find($userId);
 
         if ($user === null) {
-            return new JsonResponse(['error' => 'User not found'], 404);
+            return new JsonResponse(['error' => 'Kullanıcı bulunamadı.'], 404);
         }
 
         $assignment = $entityManager->getRepository(TaskAssignment::class)
             ->findOneBy(['task' => $task, 'user' => $user]);    
         
         if($assignment === null) {
-            return new JsonResponse(['error' => 'This user is not assigned to this task.', 404]);
+            return new JsonResponse(['error' => 'Bu kullanıcı bu göreve atanmamış.', 404]);
         }
 
         $activityLogger->log(

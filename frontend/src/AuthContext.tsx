@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { setUnauthorizedHandler } from "./lib/apiClient";
 
-interface User {
+export interface User {
     id: number
     email: string
     name: string
@@ -41,6 +42,12 @@ export function AuthProvider({children} : {children: ReactNode}){
         setToken(null)
         setUser(null)
     }
+
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            logout()
+        })
+    }, [])
 
     const updateUser = (updatedUser: User) => {
         localStorage.setItem('user', JSON.stringify(updatedUser))

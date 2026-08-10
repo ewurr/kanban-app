@@ -70,6 +70,11 @@ class Board
         return $this;
     }
 
+    public function getWorkspace(): Workspace
+    {
+        return $this->getProject()->getWorkspace();
+    }
+
     public function getColumns(): Collection
     {
         return $this->columns;

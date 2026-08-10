@@ -52,8 +52,43 @@ class BoardRepository extends ServiceEntityRepository
                 ->join('p.workspace', 'w')
                 ->join('w.workspaceMembers', 'wm')
                 ->where('wm.user = :user')
+                ->andWhere(
+                    '(wm.role = :owner) OR EXISTS (
+                        SELECT 1 FROM App\Entity\TaskAssignment ta
+                        JOIN ta.task t
+                        JOIN t.column c
+                        WHERE c.board = b AND ta.user = :user
+                    )'
+                )
                 ->setParameter('user', $user)
+                ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER)
                 ->getQuery()
                 ->getResult();
+    }
+
+    /**
+     * @return Board[]
+     */
+    public function findAllForUserAndProject(User $user, int $projectId): array
+    {
+        return $this->createQueryBuilder('b')
+            ->join('b.project', 'p')
+            ->join('p.workspace', 'w')
+            ->join('w.workspaceMembers', 'wm')
+            ->where('wm.user = :user')
+            ->andWhere('p.id = :projectId')
+            ->andWhere(
+                '(wm.role = :owner) OR EXISTS (
+                    SELECT 1 FROM App\Entity\TaskAssignment ta
+                    JOIN ta.task t
+                    JOIN t.column c
+                    WHERE c.board = b AND ta.user = :user
+                )'
+            )
+            ->setParameter('user', $user)
+            ->setParameter('projectId', $projectId)
+            ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER)
+            ->getQuery()
+            ->getResult();
     }
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import styles from './AddColumnModal.module.css'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage'
 
 interface AddColumnModalProps {
   boardId: number
@@ -11,32 +12,16 @@ interface AddColumnModalProps {
 
 export function AddColumnModal({ boardId, nextPosition, onClose }: AddColumnModalProps) {
   const [name, setName] = useState('')
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('http://localhost:8000/api/columns', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          boardId,
-          name,
-          position: nextPosition,
-        }),
-      })
-      if (!response.ok) throw new Error('Column oluşturulamadı')
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['columns'] })
-      setName('')
-      onClose()
-    },
-  })
+      mutationFn: () => apiClient.post('/columns', { boardId, name, position: nextPosition }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['columns'] })
+        setName('')
+        onClose()
+      },
+    })
 
   return (
     <div className={`${styles.overlay} animate-fade-in`} onClick={onClose}>
@@ -55,6 +40,7 @@ export function AddColumnModal({ boardId, nextPosition, onClose }: AddColumnModa
         />
 
         <div className={styles.actions}>
+        {mutation.isError && <ErrorMessage message={mutation.error.message} />}
           <button
             onClick={() => mutation.mutate()}
             disabled={!name.trim() || mutation.isPending}

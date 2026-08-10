@@ -130,20 +130,20 @@ final class WorkspaceController extends AbstractController
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email'] ?? null]);
 
         if($user === null) {
-            return new JsonResponse(['error' => 'User not found'], 404);
+            return new JsonResponse(['error' => 'Kullanıcı bulunamadı.'], 404);
         }
 
         $role = WorkspaceRole::tryFrom($data['role'] ?? '');
         
         if($role === null){
-            return new JsonResponse(['error' => 'Invalid Role. Must be Owner, PM or Worker.']);
+            return new JsonResponse(['error' => 'Geçersiz rol. Owner, PM veya Worker olmalıdır.'], 400);
         }
 
         $existingMembership = $entityManager->getRepository(WorkspaceMember::class)
             ->findOneByWorkspaceAndUser($workspace, $user);
 
         if ($existingMembership !== null) {
-            return new JsonResponse(['error' => 'This user is already a member of workspace.'], 409);
+            return new JsonResponse(['error' => 'Bu kullanıcı zaten workspace üyesi.'], 409);
         }
 
         $membership = new WorkspaceMember();

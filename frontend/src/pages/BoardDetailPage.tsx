@@ -8,68 +8,52 @@ import { AddColumnCard } from '../components/AddColumnCard/AddColumnCard'
 import { MemberTaskPanel } from '../components/MemberTaskPanel/MemberTaskPanel'
 import styles from './BoardDetailPage.module.css'
 import { AddTaskCard } from '../components/AddTaskCard/AddTaskCard'
+import { apiClient } from '../lib/apiClient'
+import { ErrorMessage } from '../components/ErrorMessage/ErrorMessage'
+import { LoadingState } from '../components/LoadingState/LoadingState'
 
 
 export function BoardDetailPage() {
   const { id } = useParams()
-  const { token, user } = useAuth()
+  const { user } = useAuth()
 
-  const { data: columns, isLoading: columnsLoading } = useQuery<ColumnType[]>({
-    queryKey: ['columns', id],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/columns', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
-  })
+  const { data: columns, isLoading: columnsLoading, isError: columnsError, error: columnsErrorObj } = useQuery<ColumnType[]>({
+      queryKey: ['columns', id],
+      queryFn: () => apiClient.get<ColumnType[]>(`/columns?boardId=${id}`),
+    })
 
-  const { data: tasks, isLoading: tasksLoading } = useQuery<TaskType[]>({
-    queryKey: ['tasks', id],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/tasks', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
-  })
+    const { data: tasks, isLoading: tasksLoading, isError: tasksError, error: tasksErrorObj } = useQuery<TaskType[]>({
+      queryKey: ['tasks', id],
+      queryFn: () => apiClient.get<TaskType[]>(`/tasks?boardId=${id}`),
+    })
 
-  const { data: board, isLoading: boardLoading } = useQuery<BoardType>({
-    queryKey: ['board', id],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/boards/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
-  })
+    const { data: board, isLoading: boardLoading, isError: boardError, error: boardErrorObj } = useQuery<BoardType>({
+      queryKey: ['board', id],
+      queryFn: () => apiClient.get<BoardType>(`/boards/${id}`),
+    })
 
-  const { data: workspace } = useQuery<{ workspaceMembers: { id: number; user: { id: number; name: string; surname: string }; role: string }[] }>({
-    queryKey: ['workspace', board?.project.workspace.id],
-    enabled: !!board,
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8000/api/workspaces/${board?.project.workspace.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return response.json()
-    },
-  })
+    const { data: workspace } = useQuery<{ workspaceMembers: { id: number; user: { id: number; name: string; surname: string; email: string }; role: string }[] }>({
+      queryKey: ['workspace', board?.project.workspace.id],
+      enabled: !!board,
+      queryFn: () => apiClient.get(`/workspaces/${board?.project.workspace.id}`),
+    })
 
   if (columnsLoading || tasksLoading || boardLoading) {
-    return <p>Yükleniyor...</p>
+    return <LoadingState message="Panolar hazırlanıyor..." />
   }
 
-  const boardColumns = columns
-    ?.filter((column) => column.board.id === Number(id))
-    .sort((a, b) => a.position - b.position)
+  if (columnsError || tasksError || boardError) {
+    const firstError = columnsErrorObj ?? tasksErrorObj ?? boardErrorObj
+    return (
+      <div style={{ padding: '40px' }}>
+        <ErrorMessage message={firstError instanceof Error ? firstError.message : 'Bir hata oluştu.'} variant="light" />
+      </div>
+    )
+  }
+  
+  const boardColumns = columns?.slice().sort((a, b) => a.position - b.position)
 
-  const boardTasks = tasks?.filter((task) =>
-    boardColumns?.some((col) => col.id === task.column.id)
-  ) ?? []
+  const boardTasks = tasks ?? []
 
   const myMembership = workspace?.workspaceMembers.find((m) => m.user.id === user?.id)
   const canManage = myMembership?.role === 'owner' || myMembership?.role === 'pm'

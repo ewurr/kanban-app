@@ -46,7 +46,7 @@ final class CommentVoter extends Voter
                 return true;
             }
 
-            $workspace = $subject->getTask()->getColumn()->getBoard()->getProject()->getWorkspace();
+            $workspace = $subject->getWorkspace();
             $membership = $this->workspaceMemberRepository->findOneByWorkspaceAndUser($workspace, $user);
 
             if ($membership === null) {
