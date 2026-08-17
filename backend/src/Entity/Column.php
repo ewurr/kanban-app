@@ -38,7 +38,7 @@ class Column
 
     #[ORM\ManyToOne(targetEntity: Board::class)]
     #[ORM\JoinColumn(nullable: false, onDelete:'CASCADE')]
-    #[Groups(['column:read', 'notification:read'])]
+    #[Groups(['column:read', 'notification:read', 'task:read'])]
     private ?Board $board = null;
 
     /**

@@ -101,3 +101,35 @@
   color: rgba(255, 255, 255, 0.3);
   cursor: not-allowed;
 }
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px 6px 10px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  margin-bottom: 20px;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
+@media (prefers-color-scheme: dark) {
+  .backButton {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .backButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

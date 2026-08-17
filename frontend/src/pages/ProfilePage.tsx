@@ -4,10 +4,12 @@ import { useAuth, type User } from '../AuthContext'
 import styles from './ProfilePage.module.css'
 import { apiClient } from '../lib/apiClient'
 import { ErrorMessage } from '../components/ErrorMessage/ErrorMessage'
+import { useNavigate } from 'react-router-dom'
 
 export function ProfilePage() {
   const { user, updateUser } = useAuth()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const [name, setName] = useState(user?.name ?? '')
   const [surname, setSurname] = useState(user?.surname ?? '')
@@ -61,6 +63,9 @@ export function ProfilePage() {
 
   return (
     <div className={styles.page}>
+      <button className={styles.backButton} onClick={() => navigate(-1)}>
+        ← Geri
+      </button>
       <h1 className={styles.pageTitle}>Profilim</h1>
 
       <div className={styles.cardsRow}>

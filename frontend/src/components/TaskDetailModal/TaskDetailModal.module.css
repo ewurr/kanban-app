@@ -16,10 +16,19 @@
   padding: 28px;
   width: 400px;
   max-width: 90vw;
-  max-height: 85vh;
-  overflow-y: auto;
+  height: 60vh;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
   position: relative;
   box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.tabContent {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px; /* scrollbar için küçük boşluk */
 }
 
 .closeButton {
@@ -362,4 +371,358 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.labelList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.labelChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.labelRemoveButton {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+}
+
+.labelRemoveButton:hover {
+  opacity: 1;
+}
+
+.labelPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.labelOption {
+  border: none;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.labelOption:hover {
+  opacity: 1;
+}
+
+.newLabelButton {
+  background: none;
+  border: 1px dashed #999;
+  color: #666;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.newLabelButton:hover {
+  border-color: #666;
+  color: #333;
+}
+
+.labelCreateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.colorPalette {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.colorSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.1);
+}
+
+.colorSwatchSelected {
+  border-color: #333;
+  transform: scale(1.15);
+}
+
+.tabBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  margin-left: 5px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Checklist Progress ─────────────────────── */
+.checklistProgress {
+  margin-bottom: 16px;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progressLabel {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.progressPercent {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.progressTrack {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #5E9B5E, #7CC47C);
+  border-radius: 999px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressComplete {
+  background: linear-gradient(90deg, #2E7D32, #4CAF50);
+}
+
+/* ── Tamamlananları gizle ───────────────────── */
+.hideCompletedButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.38);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  transition: color 0.15s ease;
+}
+
+.hideCompletedButton:hover {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* ── Madde listesi ──────────────────────────── */
+.checklistItems {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.checklistItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background-color 0.12s ease;
+  cursor: default;
+}
+
+.checklistItem:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Checkbox ───────────────────────────────── */
+.checkbox {
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid rgba(0, 0, 0, 0.22);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.12s ease;
+  font-size: 10px;
+  color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.checkbox:hover {
+  border-color: rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.checkbox:active {
+  transform: scale(0.93);
+}
+
+.checkboxChecked {
+  background: #4A7C4A;
+  border-color: #4A7C4A;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.checkboxChecked:hover {
+  background: #3D6B3D;
+  border-color: #3D6B3D;
+}
+
+/* ── Madde içeriği ──────────────────────────── */
+.checklistContent {
+  flex: 1;
+  font-size: 13.5px;
+  color: rgba(0, 0, 0, 0.72);
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.checklistContentDone {
+  text-decoration: line-through;
+  text-decoration-color: rgba(0, 0, 0, 0.25);
+  color: rgba(0, 0, 0, 0.35);
+}
+
+/* ── Düzenleme satırı ───────────────────────── */
+.checklistEditRow {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  align-items: center;
+}
+
+/* ── Hover aksiyonları ──────────────────────── */
+.checklistActions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.checklistItem:hover .checklistActions {
+  opacity: 1;
+}
+
+.checklistEditButton,
+.checklistDeleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.checklistEditButton {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.checklistEditButton:hover {
+  background: rgba(0, 0, 0, 0.07);
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.checklistDeleteButton {
+  color: rgba(0, 0, 0, 0.28);
+}
+
+.checklistDeleteButton:hover {
+  background: rgba(192, 57, 43, 0.1);
+  color: #c0392b;
+}
+
+/* ── Yeni madde ekleme ──────────────────────── */
+.checklistAddRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1.5px dashed rgba(0, 0, 0, 0.14);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.checklistAddRow:focus-within {
+  border-color: rgba(0, 0, 0, 0.28);
+  background: rgba(255, 255, 255, 0.45);
+  border-style: solid;
+}
+
+.checklistInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-family: var(--font-body, sans-serif);
+  color: rgba(0, 0, 0, 0.72);
+  outline: none;
+  padding: 2px 0;
+}
+
+.checklistInput::placeholder {
+  color: rgba(0, 0, 0, 0.3);
 }

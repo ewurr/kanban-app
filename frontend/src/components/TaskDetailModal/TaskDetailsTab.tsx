@@ -2,15 +2,17 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../../lib/apiClient'
 import type { Task as TaskType, Workspace as WorkspaceType, Column as ColumnType } from '../../types/kanban'
+import { TaskLabels } from './TaskLabels'
 import styles from './TaskDetailModal.module.css'
 
 interface TaskDetailsTabProps {
   task: TaskType
   workspaceId: number
+  boardId: number
   onClose: () => void
 }
 
-export function TaskDetailsTab({ task, workspaceId, onClose }: TaskDetailsTabProps) {
+export function TaskDetailsTab({ task, workspaceId, boardId, onClose }: TaskDetailsTabProps) {
   const queryClient = useQueryClient()
 
   const [selectedUserId, setSelectedUserId] = useState('')
@@ -228,6 +230,7 @@ export function TaskDetailsTab({ task, workspaceId, onClose }: TaskDetailsTabPro
           </button>
         </div>
       )}
+      <TaskLabels task={task} boardId={boardId}/>
     </>
   )
 }

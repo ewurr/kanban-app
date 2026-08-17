@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../AuthContext'
 import type { Board as BoardType } from '../../types/kanban'
@@ -14,6 +14,7 @@ export function TopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isBoardSelectorOpen, setIsBoardSelectorOpen] = useState(false)
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const workspaceMatch = location.pathname.match(/^\/workspaces\/(\d+)/)
   const workspaceIdFromUrl = workspaceMatch ? Number(workspaceMatch[1]) : null
@@ -63,6 +64,26 @@ export function TopBar() {
   }
   const currentRoleLabel = myMembership ? roleLabels[myMembership.role] : null
 
+  const activeFilters = searchParams.get('filter')?.split(',').filter(Boolean) ?? []
+  const isAssignedToMeActive = activeFilters.includes('assigned-to-me')
+
+  function toggleFilter(filterName: string) {
+    const current = new Set(activeFilters)
+    if (current.has(filterName)) {
+      current.delete(filterName)
+    } else {
+      current.add(filterName)
+    }
+
+    const newParams = new URLSearchParams(searchParams)
+    if (current.size === 0) {
+      newParams.delete('filter')
+    } else {
+      newParams.set('filter', Array.from(current).join(','))
+    }
+    setSearchParams(newParams)
+  }
+
   return (
     <>
       <div className={styles.topBar}>
@@ -111,6 +132,27 @@ export function TopBar() {
             </>
           )}
         </div>
+
+        {currentWorkspaceId && (
+           <Link
+              to={`/workspaces/${currentWorkspaceId}/calendar`}
+              className={styles.calendarLink}
+              title="Takvim"
+           >
+              📅
+           </Link>
+        )}
+
+        {board && (
+          <div className={styles.filterSection}>
+            <button
+              className={`${styles.filterButton} ${isAssignedToMeActive ? styles.filterButtonActive : ''}`}
+              onClick={() => toggleFilter('assigned-to-me')}
+            >
+              👤 Bana Atananlar
+            </button>
+          </div>
+        )}
 
         <div className={styles.userSection}>
           <NotificationBell />

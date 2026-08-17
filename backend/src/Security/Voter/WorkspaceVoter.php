@@ -3,11 +3,13 @@
 namespace App\Security\Voter;
 
 use App\Entity\Board;
+use App\Entity\ChecklistItem;
 use App\Entity\Column;
 use App\Entity\Project;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Entity\Workspace;
+use App\Entity\Label;
 use App\Enum\WorkspaceRole;
 use App\Repository\TaskAssignmentRepository;
 use App\Repository\WorkspaceMemberRepository;
@@ -38,12 +40,21 @@ final class WorkspaceVoter extends Voter
     public const TASK_EDIT = 'TASK_EDIT';
     public const TASK_DELETE = 'TASK_DELETE';
 
+    public const LABEL_CREATE = 'LABEL_CREATE';
+    public const LABEL_DELETE = 'LABEL_DELETE';
+
+    public const CHECKLIST_ITEM_CREATE = 'CHECKLIST_ITEM_CREATE';
+    public const CHECKLIST_ITEM_EDIT = 'CHECKLIST_ITEM_EDIT';
+    public const CHECKLIST_ITEM_DELETE = 'CHECKLIST_ITEM_DELETE';
+
     private const ATTRIBUTES = [
         self::WORKSPACE_VIEW, self::WORKSPACE_EDIT, self::WORKSPACE_DELETE, self::WORKSPACE_MANAGE_MEMBERS,
         self::PROJECT_CREATE, self::PROJECT_EDIT, self::PROJECT_DELETE,
         self::BOARD_CREATE, self::BOARD_EDIT, self::BOARD_DELETE,
         self::COLUMN_CREATE, self::COLUMN_EDIT, self::COLUMN_DELETE,
-        self::TASK_CREATE, self::TASK_EDIT, self::TASK_DELETE,
+        self::TASK_CREATE, self::TASK_EDIT, self::TASK_DELETE, 
+        self::LABEL_CREATE, self::LABEL_DELETE,
+        self::CHECKLIST_ITEM_CREATE, self:: CHECKLIST_ITEM_EDIT, self:: CHECKLIST_ITEM_DELETE,
     ];
 
     public function __construct(
@@ -61,6 +72,8 @@ final class WorkspaceVoter extends Voter
                 || $subject instanceof Board
                 || $subject instanceof Column
                 || $subject instanceof Task
+                || $subject instanceof Label
+                || $subject instanceof ChecklistItem
             );
     }
 
@@ -100,7 +113,12 @@ final class WorkspaceVoter extends Voter
             self::COLUMN_CREATE,
             self::TASK_CREATE,
             self::TASK_EDIT,
-            self::TASK_DELETE => true, // üye olan herkes (owner+pm+worker)
+            self::TASK_DELETE ,
+            self::LABEL_CREATE,
+            self::LABEL_DELETE,
+            self::CHECKLIST_ITEM_CREATE,
+            self::CHECKLIST_ITEM_EDIT,
+            self::CHECKLIST_ITEM_DELETE => true,
 
             default => false,
         };
@@ -129,7 +147,11 @@ final class WorkspaceVoter extends Voter
         return match (true) {
             $subject instanceof Workspace => $subject,
             $subject instanceof Project => $subject->getWorkspace(),
-            $subject instanceof Board, $subject instanceof Column, $subject instanceof Task => $subject->getWorkspace(),
+            $subject instanceof Board, 
+            $subject instanceof Column, 
+            $subject instanceof Task,
+            $subject instanceof Label,
+            $subject instanceof ChecklistItem => $subject->getWorkspace(),
         };
     }
 

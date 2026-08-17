@@ -14,6 +14,10 @@ export function AddWorkspaceModal({ onClose }: AddWorkspaceModalProps) {
 
     const mutation = useMutation({
         mutationFn: () => apiClient.post('/workspaces', { name }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['workspaces']})
+            onClose()
+        },
     })
     
     return (

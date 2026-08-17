@@ -13,6 +13,7 @@ use App\Entity\Column;
 use App\Entity\User;
 use App\Entity\Project;
 use App\Entity\Workspace;
+use App\Entity\Label;
 
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
@@ -31,6 +32,8 @@ class Task
     {
         $this->assignments = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->labels = new ArrayCollection();
+        $this->checklistItems = new ArrayCollection();
     }
 
     #[ORM\Column(length: 255)]
@@ -75,6 +78,23 @@ class Task
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: TaskAssignment::class)]
     #[Groups(['task:read'])]
     private Collection $assignments;
+
+    /**
+     * @var Collection <int, Label>
+     */
+    #[ORM\ManyToMany(targetEntity: Label::class, inversedBy: 'tasks')]
+    #[ORM\JoinTable(name: 'task_label')]
+    #[Groups(['task:read'])]
+    private Collection $labels;
+
+    /**
+     * @var Collection<int, ChecklistItem>
+     */
+    #[ORM\OneToMany(targetEntity: ChecklistItem::class, mappedBy: 'task', cascade: ['persist', 'remove'])]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    #[Groups(['task:read'])]
+    private Collection $checklistItems;
+    
 
     public function getId(): ?int
     {
@@ -186,6 +206,11 @@ class Task
         return $this->getColumn()->getBoard()->getProject();
     }
 
+    public function getBoard(): Board
+    {
+        return $this->getColumn()->getBoard();
+    }
+
     public function getWorkspace(): Workspace
     {
         return $this->getProject()->getWorkspace();
@@ -208,5 +233,29 @@ class Task
     public function getAssignments(): Collection
     {
         return $this->assignments;
+    }
+
+
+    /**
+     * @return Collection<int, Label>
+     */
+    public function getLabels(): Collection
+    {
+        return $this->labels;
+    }
+
+    public function addLabel(Label $label): static
+    {
+        if (!$this->labels->contains($label)) {
+            $this->labels->add($label);
+        }
+        return $this;
+    }
+
+    public function removeLabel(Label $label): static
+    {
+        $this->labels->removeElement($label);
+
+        return $this;
     }
 }

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { Column as ColumnType, Task as TaskType } from '../../types/kanban'
 import { Task } from '../Task/Task'
 import styles from './Column.module.css'
@@ -39,6 +41,16 @@ export function Column({ column, tasks, workspaceId, canManage }: ColumnProps) {
     }
   }
 
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: `column-${column.id}`,
+    data: {
+      type: 'column',
+      columnId: column.id,
+    },
+  })
+
+  const taskIds = tasks.map((task) => task.id)
+
   return (
     <div className={styles.paper}>
       <div className={styles.pin} />
@@ -75,10 +87,12 @@ export function Column({ column, tasks, workspaceId, canManage }: ColumnProps) {
       
       {deleteMutation.isError && <ErrorMessage message={deleteMutation.error.message} />}
 
-      <div className={styles.taskList}>
+      <div className={styles.taskList} ref={setDroppableRef}>
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {tasks.map((task, index) => (
-              <Task key={task.id} task={task} workspaceId={workspaceId} animationDelay={index * 0.05} />
+              <Task key={task.id} task={task} workspaceId={workspaceId} boardId={column.board.id} animationDelay={index * 0.05} />
           ))}
+        </SortableContext>
       </div>
       
     </div>

@@ -47,6 +47,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export const apiClient = {
+    
     get: async <T>(path: string): Promise<T> => {
         const response = await fetch(`${API_BASE_URL}${path}`, {
             headers: { ...getAuthHeaders() },

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../AuthContext'
 import type { Column as ColumnType, Task as TaskType } from '../../types/kanban'
@@ -16,6 +16,23 @@ interface AddTaskModalProps {
 const POST_IT_COLORS = ['#FFD93D', '#FF9B9B', '#A8E6CF', '#C9C3FF', '#FFB6E1']
 
 export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalProps) {
+
+  useEffect(() => {
+    const scrollY = window.scrollY
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      window.scrollTo(0, scrollY)
+    }
+  }, [])
+
   const columnsInBoard = columns.filter((c) => c.board.id === boardId).sort((a, b) => a.position - b.position)
 
   const [title, setTitle] = useState('')
@@ -105,7 +122,9 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
         <div className={styles.actions}>
           {mutation.isError && <ErrorMessage message={mutation.error.message} />}
           <button
-            onClick={() => mutation.mutate()}
+            onClick={() => {mutation.mutate();
+                            onClose();
+                          }}
             disabled={!title.trim() || !columnId || mutation.isPending}
             className={styles.saveButton}
           >

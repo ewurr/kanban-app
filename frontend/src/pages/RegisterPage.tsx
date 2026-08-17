@@ -6,7 +6,7 @@ import { apiClient } from "../lib/apiClient";
 import { ErrorMessage } from "../components/ErrorMessage/ErrorMessage";
 
 export function RegisterPage(){
-    const[email, setEmail] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState<string | null>(null)

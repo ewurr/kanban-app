@@ -90,4 +90,30 @@ class TaskRepository extends ServiceEntityRepository
                 ->getQuery()
                 ->getResult();
     }
+
+    /**
+     * @return Task[]
+     */
+    public function findAllForUserandWorkspace(User $user, int $workspaceId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->join('t.column', 'c')
+            ->join('c.board', 'b')
+            ->join('b.project', 'p')
+            ->join('p.workspace', 'w')
+            ->join('w.workspaceMembers', 'wm')
+            ->where('wm.user = :user')
+            ->andWhere('w.id = :workspaceId')
+            ->andWhere(
+                '(wm.role = :owner) OR EXISTS (
+                    SELECT 1 FROM APP\Entity\TaskAssignment ta
+                    WHERE ta.task = t AND ta.user = :user
+                )'
+            )
+            ->setParameter('user', $user)
+            ->setParameter('workspaceId', $workspaceId)
+            ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER)
+            ->getQuery()
+            ->getResult();
+    }
 }

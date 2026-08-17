@@ -1,75 +1,69 @@
 import { useState } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Task as TaskType } from '../../types/kanban'
 import { TaskDetailModal } from '../TaskDetailModal/TaskDetailModal'
-import styles from './Task.module.css'
+import { TaskCard } from './TaskCard'
 
 interface TaskProps {
     task: TaskType
     workspaceId: number
+    boardId: number
     animationDelay?: number
 }
 
-function getPriorityColor(priority: string): string {
-    if (priority === 'low') return '#4CAF50'
-    if (priority === 'medium') return '#FFC107'
-    if (priority === 'high') return '#E53935'
-    return 'transparent'
-}
-
-export function Task({ task, workspaceId, animationDelay }: TaskProps) {
+export function Task({ task, workspaceId, animationDelay, boardId }: TaskProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const rotation = (task.id % 5) - 2
-    const priorityColor = getPriorityColor(task.priority)
- 
-    const dueDateStatus = task.dueDateStatus
+
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: task.id,
+        data: {
+            type: 'task',
+            task,
+        },
+    })
 
     return (
         <>
-            <div className={`${styles.postIt} animate-fade-up`}
-                onClick={() => setIsModalOpen(true)}
+            <div
+                ref={setNodeRef}
+                {...attributes}
+                {...listeners}
+                className="animate-fade-up"
                 style={{
-                    backgroundColor: task.color,
-                    border: `3px solid ${priorityColor}`,
-                    transform: `rotate(${rotation}deg)`,
                     animationDelay: `${animationDelay ?? 0}s`,
                 }}
             >
-                {dueDateStatus === 'overdue' && (
-                    <span className={styles.dueBadgeOverdue}>⚠ Gecikti</span>
-                )}
-                {dueDateStatus === 'soon' && (
-                    <span className={styles.dueBadgeSoon}>⏰ Yaklaşıyor</span>
-                )}
-
-                <p className={styles.title}>
-                    {task.title.length > 30
-                        ? `${task.title.slice(0, 30)}...`
-                        : task.title}
-                </p>
-
-                {task.description && (
-                    <p className={styles.descriptionPreview}>
-                        {task.description.length > 40
-                            ? `${task.description.slice(0, 40)}...`
-                            : task.description}
-                    </p>
-                )}
-
-                {task.assignments.length > 0 && (
-                    <div className={styles.assignees}>
-                        {task.assignments.map((assignment) => (
-                            <span key={assignment.id} className={styles.assigneeChip}>
-                                {assignment.user.name} {assignment.user.surname}
-                            </span>
-                        ))}
-                    </div>
-                )}
+                <TaskCard
+                    task={task}
+                    rotation={rotation}
+                    onClick={() => {
+                        if (!isDragging) setIsModalOpen(true)
+                    }}
+                    style={{
+                        transform: transform
+                            ? `${CSS.Transform.toString(transform)} rotate(${rotation}deg)`
+                            : `rotate(${rotation}deg)`,
+                        transition,
+                        opacity: isDragging ? 0.4 : 1,
+                        cursor: isDragging ? 'grabbing' : 'grab',
+                    }}
+                />
             </div>
 
             {isModalOpen && (
                 <TaskDetailModal
                     task={task}
                     workspaceId={workspaceId}
+                    boardId={boardId}
                     onClose={() => setIsModalOpen(false)}
                 />
             )}

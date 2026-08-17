@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Column;
+use App\Entity\Label;
 use App\Repository\TaskRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,12 +27,15 @@ use App\Service\NotificationService;
 final class TaskController extends AbstractController
 {
     #[Route('', name: 'app_task_index', methods: ['GET'])]
-    public function index (Request $request, TaskRepository $taskRepository, SerializerInterface $serializer): JsonResponse
+    public function index(Request $request, TaskRepository $taskRepository, SerializerInterface $serializer): JsonResponse
     {
         $boardId = $request->query->get('boardId');
+        $workspaceId = $request->query->get('workspaceId');
 
-        if($boardId !== null) {
-            $tasks = $taskRepository->findAllForUserAndBoard($this->getUser(), (int)$boardId);
+        if ($boardId !== null) {
+            $tasks = $taskRepository->findAllForUserAndBoard($this->getUser(), (int) $boardId);
+        } elseif ($workspaceId !== null) {
+            $tasks = $taskRepository->findAllForUserAndWorkspace($this->getUser(), (int) $workspaceId);
         } else {
             $tasks = $taskRepository->findAllForUser($this->getUser());
         }
@@ -103,6 +107,89 @@ final class TaskController extends AbstractController
         return JsonResponse::fromJsonString($json, 201);
     }
 
+    #[Route('/reorder', name: 'app_task_reorder', methods: ['PATCH'])]
+    public function reorder (
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ActivityLogger $activityLogger
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+        $columnsData = $data['columns'] ?? [];
+
+        $currentUser = $this->getUser();
+
+        if (!$currentUser instanceof User) {
+            // JWT string identifier dönüyorsa entity'yi DB'den çek
+            $currentUser = $entityManager->getRepository(User::class)
+                ->findOneBy(['email' => $currentUser]);
+        }
+
+        if (!$currentUser instanceof User) {
+            return new JsonResponse(['error' => 'Kullanıcı doğrulanamadı.'], 401);
+        }
+
+        if(!is_array($columnsData) || count($columnsData) === 0) {
+            return new JsonResponse(['error' => 'Geçersiz veri.'], 400);
+        }
+
+        $entityManager->beginTransaction();
+
+        try{
+            foreach($columnsData as $columnPayload) {
+                $column = $entityManager->getRepository(Column::class)
+                    ->find($columnPayload['columnId'] ?? null);
+
+                if($column === null) {
+                    throw new \RuntimeException('Column bulunamadı.'); 
+                }
+
+                $taskIds = $columnPayload['taskIds'] ?? [];
+
+                foreach($taskIds as $position => $taskId) {
+
+                    $taskId = (int) $taskId;
+
+                    if($taskId === 0){
+                        throw new \RuntimeException('Geçersiz task ID.');
+                    }
+
+                    $task = $entityManager->getRepository(Task::class)->find($taskId);
+
+                    if($task === null) {
+                        throw new \RuntimeException('Task bulunamadı.' . $taskId);
+                    }
+
+                    $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
+
+                    $oldColumn = $task->getColumn();
+
+                    if($oldColumn->getId() !== $column->getId()) {
+                        $activityLogger->log(
+                            $task,
+                            ActivityAction::Moved,
+                            $currentUser,
+                            $oldColumn->getName(),
+                            $column->getName()
+                        );
+                        $task->setColumn($column);
+                    }
+
+                    $task->setPosition($position);
+                }
+            }
+            $entityManager->flush();
+            $entityManager->commit();
+        
+        } catch (\Throwable $e) {
+            $entityManager->rollback();
+            return new JsonResponse(['error' => $e->getMessage()], 400);
+        }
+
+        return new JsonResponse(null, 204);
+
+    }
+
+
     #[Route('/{id}', name: 'app_task_update', methods: ['PUT'])]
     public function update(
         Task $task, 
@@ -131,10 +218,6 @@ final class TaskController extends AbstractController
         if(isset($data['priority'])){
             $task->setPriority($data['priority']);  
         }   
-
-        if(isset($data['position'])){
-            $task->setPosition($data['position']);
-        }
 
         if (isset($data['dueDate'])) {
             $task->setDueDate(new \DateTimeImmutable($data['dueDate']));
@@ -208,7 +291,7 @@ final class TaskController extends AbstractController
             ->findOneBy(['task' => $task, 'user' => $user]);
     
         if($existingAssignment !== null){
-            return new JsonResponse(['error' => 'Bu kullanıcı zaten bu göreve atanmış.'], 404);
+            return new JsonResponse(['error' => 'Bu kullanıcı zaten bu göreve atanmış.'], 409);
         }
 
         $assignment = new TaskAssignment();
@@ -300,6 +383,57 @@ final class TaskController extends AbstractController
         $logs = $activityLogRepository->findByTaskOrdered($task);
 
         $json = $serializer->serialize($logs, 'json', ['groups' => 'activity:read']);
+
+        return JsonResponse::fromJsonString($json);
+    }
+
+
+    #[Route('/{id}/labels/{labelId}', name: 'app_task_add_label', methods: ['POST'])]
+    public function addLabel(
+        Task $task,
+        int $labelId,
+        EntityManagerInterface $entityManager,
+        SerializerInterface $serializer
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
+
+        $label = $entityManager->getRepository(Label::class)->find($labelId);
+
+        if ($label === null) {
+            return new JsonResponse(['error' => 'Etiket bulunamadı.'], 404);
+        }
+
+        if ($label->getBoard()->getId() !== $task->getColumn()->getBoard()->getId()) {
+            return new JsonResponse(['error' => 'Bu etiket bu board\'a ait değil.'], 400);
+        }
+
+        $task->addLabel($label);
+        $entityManager->flush();
+
+        $json = $serializer->serialize($task, 'json', ['groups' => 'task:read']);
+
+        return JsonResponse::fromJsonString($json);
+    }
+
+    #[Route('/{id}/labels/{labelId}', name: 'app_task_remove_label', methods: ['DELETE'])]
+    public function removeLabel(
+        Task $task,
+        int $labelId,
+        EntityManagerInterface $entityManager,
+        SerializerInterface $serializer
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
+
+        $label = $entityManager->getRepository(Label::class)->find($labelId);
+
+        if ($label === null) {
+            return new JsonResponse(['error' => 'Etiket bulunamadı.'], 404);
+        }
+
+        $task->removeLabel($label);
+        $entityManager->flush();
+
+        $json = $serializer->serialize($task, 'json', ['groups' => 'task:read']);
 
         return JsonResponse::fromJsonString($json);
     }

@@ -111,3 +111,47 @@
   padding: 2px 8px;
   border-radius: 10px;
 }
+
+.filterSection {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 16px;
+}
+
+.filterButton {
+    background-color: transparent;
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.filterButton:hover {
+    border-color: #888;
+    color: #fff;
+}
+
+.filterButtonActive {
+    background-color: rgba(79, 195, 247, 0.15);
+    border-color: #4FC3F7;
+    color: #4FC3F7;
+}
+
+.calendarLink {
+  font-size: 18px;
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.calendarLink:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}

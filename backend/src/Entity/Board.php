@@ -16,7 +16,7 @@ class Board
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['board:read', 'column:read', 'notification:read'])]
+    #[Groups(['board:read', 'column:read', 'notification:read', 'label:read', 'task:read'])]
     private ?int $id = null;
 
     public function __construct()
@@ -25,7 +25,7 @@ class Board
     }
 
     #[ORM\Column(length: 255)]
-    #[Groups(['board:read', 'column:read'])]
+    #[Groups(['board:read', 'column:read', 'label:read', 'task:read'])]
     #[Assert\NotBlank(message: 'Board adı zorunludur.')]
     #[Assert\Length(min: 2, max: 255, minMessage: 'Board adı en az 2 karakter olmalıdır.')]
     private ?string $name = null;

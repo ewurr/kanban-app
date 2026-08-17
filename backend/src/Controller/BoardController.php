@@ -60,7 +60,7 @@ final class BoardController extends AbstractController
         $project = $entityManager->getRepository(Project::class)->find($data['projectId'] ?? null);
 
         if ($project === null) {
-            return new JsonResponse(['error' => 'Project not found'], 404);
+            return new JsonResponse(['error' => 'Proje bulunamadı.'], 404);
         }
 
         $this->denyAccessUnlessGranted(WorkspaceVoter::BOARD_CREATE, $project);

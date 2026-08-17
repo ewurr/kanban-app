@@ -7,6 +7,7 @@
   cursor: pointer;
   transition: transform 0.15s ease;
   overflow: hidden;
+  position: relative;
 }
 
 .postIt:hover {
@@ -73,4 +74,41 @@
 .dueBadgeSoon {
   background-color: #FF9800;
   color: white;
+}
+
+.labelStrip {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.labelDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.checklistSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 2px 7px 2px 5px;
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+.checklistIcon {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.checklistCount {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.55);
 }

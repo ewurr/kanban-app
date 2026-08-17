@@ -10,6 +10,19 @@ export interface TaskAssignment {
   user: User
 }
 
+export interface Label {
+  id: number
+  name: string
+  color: string
+}
+
+export interface ChecklistItem {
+  id: number
+  content: string
+  isCompleted: boolean
+  position: number
+}
+
 export interface Task {
   id: number
   title: string
@@ -22,8 +35,15 @@ export interface Task {
   position: number
   column: {
     id: number
+    name: string
+    board: {
+      id: number
+      name: string
+    }
   }
   assignments: TaskAssignment[]
+  labels: Label[]
+  checklistItems: ChecklistItem[]
 }
 
 export interface Column {

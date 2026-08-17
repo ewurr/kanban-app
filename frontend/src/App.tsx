@@ -9,6 +9,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { TopBar } from './components/TopBar/TopBar'
 import { ProfilePage } from './pages/ProfilePage'
+import { CalendarPage } from './pages/CalendarPage'
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
         <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
         <Route path="/" element={<ProtectedRoute><WorkspacesPage /></ProtectedRoute>} />
         <Route path="/workspaces/:id" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-        <Route path="/projects/:id" element={<ProtectedRoute><BoardsPage /></ProtectedRoute>} />
+        <Route path="/workspaces/:id/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />        <Route path="/projects/:id" element={<ProtectedRoute><BoardsPage /></ProtectedRoute>} />
         <Route path="/boards/:id" element={<ProtectedRoute><BoardDetailPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
