@@ -12,6 +12,7 @@ export function RegisterPage(){
     const [error, setError] = useState<string | null>(null)
     const [name, setName] = useState('')
     const [surname, setSurname] = useState('')
+    
     const navigate = useNavigate()
     const { login } = useAuth()
 
