@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Task;
 use App\Entity\User;
+use App\Filter\TaskFilter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -68,10 +69,14 @@ class TaskRepository extends ServiceEntityRepository
     /**
      * @return Task[]
      */
-    public function findAllForUserAndBoard(User $user, int $boardId): array
+    public function findAllForUserAndBoard(User $user, int $boardId, ?TaskFilter $filter = null): array
     {
-        return $this->createQueryBuilder('t')
-                ->join('t.column', 'c')
+        $qb = $this->createQueryBuilder('t')
+                ->join('t.column', 'c')->addSelect('c')
+                ->leftJoin('t.assignments', 'ta_sel')->addSelect('ta_sel')
+                ->leftJoin('ta_sel.user', 'u')->addSelect('u')
+                ->leftJoin('t.labels', 'l')->addSelect('l')
+                ->leftJoin('t.checklistItems', 'ci')->addSelect('ci')
                 ->join('c.board', 'b')
                 ->join('b.project', 'p')
                 ->join('p.workspace', 'w')
@@ -86,9 +91,38 @@ class TaskRepository extends ServiceEntityRepository
                 )
                 ->setParameter('user', $user)
                 ->setParameter('boardId', $boardId)
-                ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER)
-                ->getQuery()
-                ->getResult();
+                ->setParameter('owner', \App\Enum\WorkspaceRole::OWNER);
+
+        if($filter !== null) {
+            $this->applyFilter($qb, $filter);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    // TaskFilter içindeki dolu alanları QueryBuilder'a andWhere olarak ekler.
+    private function applyFilter(\Doctrine\ORM\QueryBuilder $qb, TaskFilter $filter): void
+    {
+        if($filter->assignedTo !== null) {
+            // bu taska şu user ID sinin atanmış old. bir assignemnt var mı
+            $qb->andWhere(
+                'EXISTS (
+                    SELECT 1 FROM App\Entity\TaskAssignment ta_filter
+                    WHERE ta_filter.task = t AND ta_filter.user = :filterAssignedTo                
+                )'
+            )->setParameter('filterAssignedTo', $filter->assignedTo);
+        }
+
+        if($filter->priority !== null) {
+            $qb->andWhere('t.priority = :filterPriority')
+                ->setParameter('filterPriority', $filter->priority);
+        }
+
+        if($filter->search !== null){
+            $qb->andWhere('LOWER(t.title) LIKE :filterSearch OR LOWER(t.description) LIKE :filterSearch')
+                ->setParameter('filterSearch', '%' . strtolower($filter->search). '%');
+        }
+
     }
 
     /**
@@ -97,7 +131,11 @@ class TaskRepository extends ServiceEntityRepository
     public function findAllForUserandWorkspace(User $user, int $workspaceId): array
     {
         return $this->createQueryBuilder('t')
-            ->join('t.column', 'c')
+            ->join('t.column', 'c')->addSelect('c')
+            ->leftJoin('t.assignments', 'ta_sel')->addSelect('ta_sel')
+            ->leftJoin('ta_sel.user', 'u')->addSelect('u')
+            ->leftJoin('t.labels', 'l')->addSelect('l')
+            ->leftJoin('t.checklistItems', 'ci')->addSelect('ci')
             ->join('c.board', 'b')
             ->join('b.project', 'p')
             ->join('p.workspace', 'w')

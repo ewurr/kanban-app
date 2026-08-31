@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
+use App\Service\PasswordResetTokenService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,7 +14,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
 
 #[Route('/api')]
 final class AuthController extends AbstractController
@@ -154,5 +157,52 @@ final class AuthController extends AbstractController
             return new JsonResponse(['message' => 'Şifre başarıyla değiştirildi.'], 200);
         }
 
+        #[Route('/forgot-password', name: 'app_auth_forgot_password', methods: ['POST'])]
+        public function forgotPassword(
+            Request $request,
+            UserRepository $userRepository,
+            PasswordResetTokenService $tokenService,
+            MailerInterface $mailer,
+        ): JsonResponse {
+            $data = json_decode($request->getContent(), true);
+            $email = trim($data['email'] ?? '');
+
+            // Her senaryoda döneceğimiz cevap — email'in varlığını sızdırmamak için.
+            $genericResponse = new JsonResponse([
+                'message' => 'Eğer bu email kayıtlıysa, sıfırlama linki gönderildi.'
+            ], 200);
+
+            // Boş email → aynı cevap, sessizce çık
+            if ($email === '') {
+                return $genericResponse;
+            }
+
+            $user = $userRepository->findOneBy(['email' => $email]);
+            if ($user === null) {
+                // Kullanıcı yok → yine aynı cevap dön, hiçbir şey yapma
+                return $genericResponse;
+            }
+
+            // Kullanıcı var → token üret ve email at
+            $plainToken = $tokenService->createTokenForUser($user);
+            $resetUrl = "http://localhost:5173/reset-password?token={$plainToken}";
+
+            $emailMessage = (new Email)
+                ->from('[email protected]')
+                ->to($user->getEmail())
+                ->subject('Şifre Sıfırlama')
+                ->text(
+                    "Merhaba,\n\n" .
+                    "Şifrenizi sıfırlamak için aşağıdaki linke tıklayın:\n\n" .
+                    "{$resetUrl}\n\n" .
+                    "Bu link 1 saat içinde geçerliliğini yitirecektir.\n" .
+                    "Eğer bu talebi siz yapmadıysanız, bu emaili görmezden gelebilirsiniz.\n\n" .
+                    "Kanban App"
+                );
+
+            $mailer->send($emailMessage);
+
+            return $genericResponse;
+        }
 
     }

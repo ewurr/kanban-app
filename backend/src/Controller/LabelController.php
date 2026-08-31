@@ -61,7 +61,10 @@ final class LabelController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $board = $entityManager->getRepository(Board::class)->find($data['boardId'] ?? null);
+        $boardId = $data['boardId'] ?? null;
+        $board = $boardId !== null 
+            ? $entityManager->getRepository(Board::class)->find($boardId)
+            : null;
 
         if ($board === null) {
             return new JsonResponse(['error' => 'Board bulunamadı.'], 404);

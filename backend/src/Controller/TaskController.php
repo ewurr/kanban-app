@@ -21,6 +21,7 @@ use App\Enum\ActivityAction;
 use App\Service\ActivityLogger;
 use App\Repository\ActivityLogRepository;
 use App\Service\NotificationService;
+use App\Filter\TaskFilter;
 
 
 #[Route('/api/tasks')]
@@ -32,8 +33,11 @@ final class TaskController extends AbstractController
         $boardId = $request->query->get('boardId');
         $workspaceId = $request->query->get('workspaceId');
 
+        $filter = $this->buildTaskFilter($request);
+    
+
         if ($boardId !== null) {
-            $tasks = $taskRepository->findAllForUserAndBoard($this->getUser(), (int) $boardId);
+            $tasks = $taskRepository->findAllForUserAndBoard($this->getUser(), (int) $boardId, $filter);
         } elseif ($workspaceId !== null) {
             $tasks = $taskRepository->findAllForUserAndWorkspace($this->getUser(), (int) $workspaceId);
         } else {
@@ -43,6 +47,36 @@ final class TaskController extends AbstractController
         $json = $serializer->serialize($tasks, 'json', ['groups' => 'task:read']);
 
         return JsonResponse::fromJsonString($json);
+    }
+
+    private function buildTaskFilter(Request $request): TaskFilter
+    {
+        // assignedTo: 'me' değerini current user ID'sine çevir,
+        // sayı ise int'e çevir, başka bir şey ise null.
+        $assignedToRaw = $request->query->get('assignedTo');
+        $assignedTo = match(true) {
+            $assignedToRaw === 'me' => $this->getUser()->getId(),
+            is_numeric($assignedToRaw) => (int)$assignedToRaw,
+            default => null,
+        };
+
+        // priority: sadece 3 geçerli değere izin ver, başkasını null'a düşür.
+        $priorityRaw = $request->query->get('priority');
+        $priority = in_array($priorityRaw, ['low', 'medium', 'high'], true)
+            ? $priorityRaw
+            : null;
+
+        // search: boş string ve sadece boşluk olan değerleri null yap.
+        $searchRaw = $request->query->get('search');
+        $search = (is_string($searchRaw) && trim($searchRaw) !== '')
+            ? trim($searchRaw)
+            : null;
+
+        return new TaskFilter(
+            assignedTo: $assignedTo,
+            priority: $priority,
+            search: $search,
+        );
     }
 
     #[Route('/{id}', name: 'app_task_show', methods: ['GET'])]
@@ -65,7 +99,10 @@ final class TaskController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $column = $entityManager->getRepository(Column::class)->find($data['columnId'] ?? null);
+        $columnId = $data['columnId'] ?? null;
+        $column = $columnId !== null 
+            ? $entityManager->getRepository(Column::class)->find($columnId) 
+            : null;
 
         if ($column === null) {
             return new JsonResponse(['error' => 'Column not found'], 404);
@@ -74,10 +111,10 @@ final class TaskController extends AbstractController
         $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_CREATE, $column);
 
         $task = new Task();
-        $task->setTitle($data['title']);
+        $task->setTitle($data['title'] ?? '');
         $task->setDescription($data['description'] ?? null);
-        $task->setPriority($data['priority']);
-        $task->setPosition($data['position']);
+        $task->setPriority($data['priority'] ?? 'medium');
+        $task->setPosition((int) ($data['position'] ?? 0));
         $task->setColumn($column);
         $task->setColor($data['color'] ?? '#FFD93D'); 
 
@@ -225,6 +262,9 @@ final class TaskController extends AbstractController
 
         if (isset($data['columnId'])){
             $column = $entityManager->getRepository(Column::class)->find($data['columnId']);
+            if ($column === null) {
+                return new JsonResponse(['error' => 'Column bulunamadı.'], 404);
+            }
             $task->setColumn($column);
         }
 
@@ -281,7 +321,10 @@ final class TaskController extends AbstractController
 
         $data =  json_decode($request->getContent(), true);
 
-        $user = $entityManager->getRepository(User::class)->find($data['userId'] ?? null);
+        $userId = $data['userId'] ?? null;
+        $user = $userId !== null
+            ? $entityManager->getRepository(User::class)->find($userId)
+            : null;
 
         if($user === null) {
             return new JsonResponse(['error' => 'Kullanıcı bulunamadı.'], 404);
@@ -340,7 +383,7 @@ final class TaskController extends AbstractController
             ->findOneBy(['task' => $task, 'user' => $user]);    
         
         if($assignment === null) {
-            return new JsonResponse(['error' => 'Bu kullanıcı bu göreve atanmamış.', 404]);
+            return new JsonResponse(['error' => 'Bu kullanıcı bu göreve atanmamış.'], 404);
         }
 
         $activityLogger->log(

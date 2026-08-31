@@ -41,8 +41,8 @@ export function BoardDetailPage() {
     })
 
     const { data: tasks, isLoading: tasksLoading, isError: tasksError, error: tasksErrorObj } = useQuery<TaskType[]>({
-      queryKey: ['tasks', id],
-      queryFn: () => apiClient.get<TaskType[]>(`/tasks?boardId=${id}`),
+      queryKey: ['tasks', id, { assignedTo: isAssignedToMeActive}],
+      queryFn: () => apiClient.get<TaskType[]>(`/tasks?boardId=${id}${isAssignedToMeActive ? '&assignedTo=me' : ''}`),
     })
 
     const { data: board, isLoading: boardLoading, isError: boardError, error: boardErrorObj } = useQuery<BoardType>({
@@ -285,13 +285,15 @@ export function BoardDetailPage() {
       // burada sadece toast'ı kapatmamız yeterli (state zaten performActualDelete tarafından temizlenecek)
   }
 
-  const filteredTasks = isAssignedToMeActive
+/** const filteredTasks = isAssignedToMeActive
     ? effectiveTasks.filter((task) => 
         task.assignments.some((assignment) => assignment.user.id === user?.id)
       )
       :effectiveTasks
-  
-  const boardTasks = filteredTasks
+*/
+
+  const boardTasks = effectiveTasks
+
 
   return (
     <DndContext

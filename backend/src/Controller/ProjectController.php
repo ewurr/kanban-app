@@ -56,12 +56,19 @@ final class ProjectController extends AbstractController
     ) : JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $workspace = $entityManager->getRepository(Workspace::class)->find($data['workspaceId']);
+        $workspaceId = $data['workspaceId'] ?? null;
+        $workspace = $workspaceId !== null 
+            ? $entityManager->getRepository(Workspace::class)->find($workspaceId)
+            : null;
+
+        if ($workspace === null) {
+            return new JsonResponse(['error' => 'Workspace bulunamadı.'], 404);
+        }
 
         $this->denyAccessUnlessGranted(WorkspaceVoter::PROJECT_CREATE, $workspace);
 
         $project = new Project();
-        $project->setName($data['name']);
+        $project->setName($data['name'] ?? '');
         $project->setDescription($data['description'] ?? null);
         $project->setWorkspace($workspace);
 
@@ -135,4 +142,3 @@ final class ProjectController extends AbstractController
     
 
 }
-

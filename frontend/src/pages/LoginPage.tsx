@@ -46,7 +46,7 @@ export function LoginPage() {
       <div className={`${styles.formPanel} ${isVisible ? styles.visible : ''}`}>
         <div className={styles.card}>
           <div className={styles.logo}>K</div>
-          <h1 className={styles.title}>Hoş Geldin</h1>
+          <h1 className={styles.title}>HOŞ GELDİN</h1>
           <p className={styles.subtitle}>Panolarına Devam Etmek İçin Giriş Yap</p>
 
           <form onSubmit={handleSubmit}>
@@ -99,7 +99,7 @@ export function LoginPage() {
         <div className={styles.shape2} />
         <div className={styles.shape3} />
         <div className={styles.visualContent}>
-          <h2 className={styles.visualTitle}>İşlerini düzenle,<br />ekibinle senkron kal.</h2>
+          <h2 className={styles.visualTitle}>İŞLERİNİ DÜZENLE,<br />EKİBİNLE SENKRON KAL.</h2>
           <p className={styles.visualText}>Kanban tarzı görev yönetimiyle projelerini kolayca takip et.</p>
         </div>
       </div>

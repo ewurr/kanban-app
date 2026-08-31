@@ -58,7 +58,10 @@ final class ColumnController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $board = $entityManager->getRepository(Board::class)->find($data['boardId'] ?? null);
+        $boardId = $data['boardId'] ?? null;
+        $board = $boardId !== null 
+            ? $entityManager->getRepository(Board::class)->find($boardId)
+            : null;
 
         if ($board === null) {
             return new JsonResponse(['error' => 'Board not found'], 404);
@@ -67,8 +70,8 @@ final class ColumnController extends AbstractController
         $this->denyAccessUnlessGranted(WorkspaceVoter::COLUMN_CREATE, $board);
 
         $column = new Column();
-        $column->setName($data['name']);
-        $column->setPosition($data['position']);
+        $column->setName($data['name'] ?? '');
+        $column->setPosition((int) ($data['position'] ?? 0));
         $column->setBoard($board);
 
         $errors = $validator->validate($column);

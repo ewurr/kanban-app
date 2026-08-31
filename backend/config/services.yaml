@@ -18,3 +18,13 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+
+
+    # Test/dev ortamında SQL sorgu sayısını takip eden middleware.
+    # Sadece 'when@test' veya 'when@dev' altında da tanımlanabilirdi;
+    # ama sabit tutmak basitliği için burada bırakıyoruz — production'da da
+    # aktif olması sadece bir sayaç incrementi, ölçülebilir bir maliyet değil.
+    App\Debug\QueryCounterMiddleware:
+        tags:
+            - { name: doctrine.middleware, connection: default, priority: 10 }

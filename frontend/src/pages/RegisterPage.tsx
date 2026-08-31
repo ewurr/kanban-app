@@ -42,7 +42,7 @@ export function RegisterPage(){
                 <div className={styles.shape2} />
                 <div className={styles.shape3} />
                 <div className={styles.visualContent}>
-                    <h2 className={styles.visualTitle}>Ekibinle birlikte<br />büyümeye başla.</h2>
+                    <h2 className={styles.visualTitle}>EKİBİNLE BİRLİKTE<br />BÜYÜMEYE BAŞLA.</h2>
                     <p className={styles.visualText}>Saniyeler içinde bir workspace oluştur, projelerini organize et.</p>
                 </div>
             </div>

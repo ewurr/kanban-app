@@ -48,5 +48,13 @@ services:
     depends_on:
       - backend
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: kanban_mailpit
+    ports:
+      - "1025:1025" # SMTP portu - backend buraya mail gönderecek
+      - "8025:8025" # Web UI portu - browser'dan buraya bakılacak
+    restart: unless-stopped
+
 volumes:
   postgres_data:
