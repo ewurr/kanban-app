@@ -34,9 +34,9 @@ export function TaskDetailsTab({ task, workspaceId, boardId, onClose }: TaskDeta
   })
 
   const { data: allColumns } = useQuery<ColumnType[]>({
-    queryKey: ['columns'],
+    queryKey: ['columns', currentColumn?.board.id],
     enabled: !!currentColumn,
-    queryFn: () => apiClient.get<ColumnType[]>('/columns'),
+    queryFn: () => apiClient.get<ColumnType[]>(`/columns?boardId=${currentColumn?.board.id}`),
   })
 
   const columnsInSameBoard = allColumns?.filter((c) => c.board.id === currentColumn?.board.id) ?? []

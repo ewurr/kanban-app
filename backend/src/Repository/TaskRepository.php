@@ -128,7 +128,7 @@ class TaskRepository extends ServiceEntityRepository
     /**
      * @return Task[]
      */
-    public function findAllForUserandWorkspace(User $user, int $workspaceId): array
+    public function findAllForUserAndWorkspace(User $user, int $workspaceId): array
     {
         return $this->createQueryBuilder('t')
             ->join('t.column', 'c')->addSelect('c')
@@ -144,7 +144,7 @@ class TaskRepository extends ServiceEntityRepository
             ->andWhere('w.id = :workspaceId')
             ->andWhere(
                 '(wm.role = :owner) OR EXISTS (
-                    SELECT 1 FROM APP\Entity\TaskAssignment ta
+                    SELECT 1 FROM App\Entity\TaskAssignment ta
                     WHERE ta.task = t AND ta.user = :user
                 )'
             )

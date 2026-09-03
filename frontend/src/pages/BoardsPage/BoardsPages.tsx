@@ -1,12 +1,12 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../AuthContext";
-import { BoardCard } from "../components/BoardCard/BoardCard"
-import { AddBoardCard } from "../components/AddBoardCard/AddBoardCard"
-import { apiClient } from '../lib/apiClient'
-import { LoadingState } from "../components/LoadingState/LoadingState";
-import type { Board, Project } from '../types/kanban'
-
+import { useAuth } from "../../AuthContext";
+import { BoardCard } from "../../components/BoardCard/BoardCard"
+import { AddBoardCard } from "../../components/AddBoardCard/AddBoardCard"
+import { apiClient } from '../../lib/apiClient'
+import { LoadingState } from "../../components/LoadingState/LoadingState";
+import type { Board, Project } from '../../types/kanban'
+import styles from './BoardsPage.module.css'
 
 export function BoardsPage(){
     const { id } = useParams()
@@ -37,8 +37,8 @@ export function BoardsPage(){
 
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
-            <div style={{ flex: 1 }}>
+        <div className={styles.pageLayout}>
+            <div className={styles.mainColumn}>
                 <h1 style={{ fontFamily: 'var(--font-hand)', fontSize: '36px', marginBottom: '2rem' }}>Boards</h1>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '24px' }}>
                     {filteredBoards?.map((board, index) => (
@@ -47,7 +47,7 @@ export function BoardsPage(){
                 </div>
             </div>
             
-            <div style={{ width: '260px', flexShrink: 0, paddingTop: '80px' }}>
+            <div className={styles.sideColumn}>
                     {canManage && <AddBoardCard projectId={Number(id)} />}
             </div>
         </div>

@@ -187,8 +187,10 @@ final class AuthController extends AbstractController
             $plainToken = $tokenService->createTokenForUser($user);
             $resetUrl = "http://localhost:5173/reset-password?token={$plainToken}";
 
+            $fromAddress = 'kanban' . '@' . 'kanban.local';
+
             $emailMessage = (new Email)
-                ->from('[email protected]')
+                ->from($fromAddress)
                 ->to($user->getEmail())
                 ->subject('Şifre Sıfırlama')
                 ->text(
@@ -205,4 +207,41 @@ final class AuthController extends AbstractController
             return $genericResponse;
         }
 
+        #[Route('/reset-password', name: 'app_auth_reset_password', methods: ['POST'])]
+        public function resetPassword(
+            Request $request,
+            PasswordResetTokenService $tokenService,
+            UserPasswordHasherInterface $passwordHasher,
+            EntityManagerInterface $entityManager,
+            ): JsonResponse {
+                $data = json_decode($request->getContent(), true);
+
+                $plainToken = trim($data['token'] ?? '');
+                $newPassword = $data['password'] ?? '';
+
+                // 1. Tokeni doğrula: hashle -> DB de ara -> süresini kontrol et
+                $resetToken = $tokenService->validateToken($plainToken);
+
+                if($resetToken === null){
+                    return new JsonResponse(['error' => 'Geçersiz veya süresi dolmuş token.'], 400);
+                }
+
+                // 2. Yeni şifre uzunluğunu kontrol et
+                if(strlen($newPassword) < 8){
+                    return new JsonResponse(['error' => 'Yeni şifre en az 8 karakter olmalıdır.'], 400);
+                }
+
+                // 3. Tokenin sahibi kullanıcının şifresini güncelle
+                $user = $resetToken->getUser();
+                $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+                $user->setPassword($hashedPassword);
+
+                // 4. Tokeni kullanılmış olarak işaretle 
+                $resetToken->markAsUsed();
+
+                // 5. İki değişikliği (user.password, token.usedAt) DB ye kaydet
+                $entityManager->flush();
+
+                return new JsonResponse(['message' => 'Şifre başarıyla sıfırlandı.'], 200);
+            }
     }

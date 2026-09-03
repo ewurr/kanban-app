@@ -155,3 +155,44 @@
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+.filterButtonText {
+  margin-left: 4px;
+}
+
+@media (max-width: 700px) {
+  .topBar {
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  .breadcrumb {
+    display: none;
+  }
+
+  .filterSection {
+    margin-left: 0;
+  }
+
+  .filterButtonText {
+    display: none;
+  }
+
+  .filterButton {
+    padding: 6px 8px;
+  }
+
+  .userName {
+    font-size: 12px;
+  }
+
+  .roleBadge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .logoutButton {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}

@@ -54,8 +54,12 @@ final class TaskController extends AbstractController
         // assignedTo: 'me' değerini current user ID'sine çevir,
         // sayı ise int'e çevir, başka bir şey ise null.
         $assignedToRaw = $request->query->get('assignedTo');
+
+        /** @var User $user */
+        $user = $this->getUser();
+
         $assignedTo = match(true) {
-            $assignedToRaw === 'me' => $this->getUser()->getId(),
+            $assignedToRaw === 'me' => $user->getId(),
             is_numeric($assignedToRaw) => (int)$assignedToRaw,
             default => null,
         };
@@ -265,6 +269,7 @@ final class TaskController extends AbstractController
             if ($column === null) {
                 return new JsonResponse(['error' => 'Column bulunamadı.'], 404);
             }
+            $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
             $task->setColumn($column);
         }
 
@@ -471,6 +476,10 @@ final class TaskController extends AbstractController
 
         if ($label === null) {
             return new JsonResponse(['error' => 'Etiket bulunamadı.'], 404);
+        }
+
+        if($label->getBoard()->getId() !== $task->getColumn()->getBoard()->getId()) {
+            return new JsonResponse(['error' => 'Bu etiket bu board\'a ait değil.'], 400);
         }
 
         $task->removeLabel($label);

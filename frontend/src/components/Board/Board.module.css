@@ -12,9 +12,25 @@
   display: flex;
   gap: 24px;
   align-items: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
   align-content: flex-start;
 
   min-height: calc(100vh - 4rem);
   box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .corkBoard {
+    padding: 48px 24px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .corkBoard {
+    padding: 24px 12px;
+    gap: 12px;
+    min-height: auto;
+  }
 }

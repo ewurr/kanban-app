@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '../lib/apiClient'
-import type { Task as TaskType } from '../types/kanban'
-import { TaskDetailModal } from '../components/TaskDetailModal/TaskDetailModal'
+import { apiClient } from '../../lib/apiClient'
+import type { Task as TaskType } from '../../types/kanban'
+import { TaskDetailModal } from '../../components/TaskDetailModal/TaskDetailModal'
 import styles from './CalendarPage.module.css'
 
 export function CalendarPage() {

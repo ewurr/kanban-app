@@ -90,6 +90,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer
     ): JsonResponse {
+
+        if($item->getTask()->getId() !== $taskId) {
+            return new JsonResponse(['error' => 'Bu checklist maddesi bu göreve ait değil.'], 404);
+        }
+
         $this->denyAccessUnlessGranted(WorkspaceVoter::CHECKLIST_ITEM_EDIT, $item);
 
         $data = json_decode($request->getContent(), true);
@@ -119,6 +124,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
         ChecklistItem $item,
         EntityManagerInterface $entityManager
     ): JsonResponse {
+        
+        if ($item->getTask()->getId() !== $taskId) {
+            return new JsonResponse(['error' => 'Bu checklist maddesi bu göreve ait değil.'], 404);
+        }
+        
         $this->denyAccessUnlessGranted(WorkspaceVoter::CHECKLIST_ITEM_DELETE, $item);
 
         $entityManager->remove($item);

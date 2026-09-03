@@ -266,6 +266,8 @@
   color: #6B5A2E;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab:hover {
@@ -275,6 +277,28 @@
 .tabActive {
   color: #2B2B2B;
   border-bottom: 2px solid #2B2B2B;
+}
+
+@media (max-width: 480px) {
+  .tabRow {
+    overflow-x: auto;
+    padding-right: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab, .tabActive {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .addAssigneeRow {
+    flex-direction: column;
+  }
+
+  .checklistEditRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .historyList {

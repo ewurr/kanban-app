@@ -124,6 +124,30 @@
   color: var(--text-h);
 }
 
+@media (max-width: 700px) {
+  .page {
+    padding: 1.25rem;
+  }
+
+  .cardsRow {
+    flex-direction: column;
+  }
+
+  .pageTitle {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 420px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .backButton {
     background: rgba(255, 255, 255, 0.05);

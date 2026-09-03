@@ -1,0 +1,17 @@
+.pageLayout {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .pageLayout {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageLayout {
+    padding: 0.75rem;
+  }
+}

@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '../AuthContext'
-import { WorkspaceCard } from '../components/WorkspaceCard/WorkspaceCard'
-import type { Workspace } from '../types/kanban'
-import { AddWorkspaceCard } from '../components/AddWorkspaceCard/AddWorkspaceCard'
-import { apiClient } from '../lib/apiClient'
-import { LoadingState } from '../components/LoadingState/LoadingState'
-
+import { useAuth } from '../../AuthContext'
+import { WorkspaceCard } from '../../components/WorkspaceCard/WorkspaceCard'
+import type { Workspace } from '../../types/kanban'
+import { AddWorkspaceCard } from '../../components/AddWorkspaceCard/AddWorkspaceCard'
+import { apiClient } from '../../lib/apiClient'
+import { LoadingState } from '../../components/LoadingState/LoadingState'
+import styles from './WorkspacePage.module.css'
 
 export function WorkspacesPage() {
   const { user } = useAuth()
@@ -24,7 +24,7 @@ export function WorkspacesPage() {
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>
+    <div className={styles.pageLayout}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontFamily: 'var(--font-hand)', fontSize: '36px' }}>Workspaces</h1>
       </div>

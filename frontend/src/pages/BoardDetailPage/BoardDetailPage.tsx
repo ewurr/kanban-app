@@ -10,21 +10,21 @@ import {
   closestCenter,
 } from '@dnd-kit/core'
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from '@dnd-kit/core'
-import { useAuth } from '../AuthContext'
-import type { Task as TaskType, Column as ColumnType, Board as BoardType } from '../types/kanban'
-import { Column } from '../components/Column/Column'
-import { Board } from '../components/Board/Board'
-import { AddColumnCard } from '../components/AddColumnCard/AddColumnCard'
-import { MemberTaskPanel } from '../components/MemberTaskPanel/MemberTaskPanel'
+import { useAuth } from '../../AuthContext'
+import type { Task as TaskType, Column as ColumnType, Board as BoardType } from '../../types/kanban'
+import { Column } from '../../components/Column/Column'
+import { Board } from '../../components/Board/Board'
+import { AddColumnCard } from '../../components/AddColumnCard/AddColumnCard'
+import { MemberTaskPanel } from '../../components/MemberTaskPanel/MemberTaskPanel'
 import styles from './BoardDetailPage.module.css'
-import { AddTaskCard } from '../components/AddTaskCard/AddTaskCard'
-import { apiClient } from '../lib/apiClient'
-import { ErrorMessage } from '../components/ErrorMessage/ErrorMessage'
-import { LoadingState } from '../components/LoadingState/LoadingState'
-import { TrashCan } from '../components/TrashCan/TrashCan'
-import { UndoToast } from '../components/UndoToast/UndoToast'
-import { TaskCard } from '../components/Task/TaskCard'
-import { ErrorToast } from '../components/ErrorToast/ErrorToast'
+import { AddTaskCard } from '../../components/AddTaskCard/AddTaskCard'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage'
+import { LoadingState } from '../../components/LoadingState/LoadingState'
+import { TrashCan } from '../../components/TrashCan/TrashCan'
+import { UndoToast } from '../../components/UndoToast/UndoToast'
+import { TaskCard } from '../../components/Task/TaskCard'
+import { ErrorToast } from '../../components/ErrorToast/ErrorToast'
 
 export function BoardDetailPage() {
   const { id } = useParams()
@@ -285,12 +285,6 @@ export function BoardDetailPage() {
       // burada sadece toast'ı kapatmamız yeterli (state zaten performActualDelete tarafından temizlenecek)
   }
 
-/** const filteredTasks = isAssignedToMeActive
-    ? effectiveTasks.filter((task) => 
-        task.assignments.some((assignment) => assignment.user.id === user?.id)
-      )
-      :effectiveTasks
-*/
 
   const boardTasks = effectiveTasks
 

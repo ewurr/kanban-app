@@ -130,7 +130,10 @@ final class ColumnController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_column_delete', methods: ['DELETE'])]
-    public function delete(Column $column, EntityManagerInterface $entityManager){
+    public function delete(
+        Column $column, 
+        EntityManagerInterface $entityManager
+        ): JsonResponse {
         $this->denyAccessUnlessGranted(WorkspaceVoter::COLUMN_DELETE, $column);
     
         $entityManager->remove($column);

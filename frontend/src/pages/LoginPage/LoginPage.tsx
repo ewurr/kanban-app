@@ -1,10 +1,10 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../AuthContext'
+import { useAuth } from '../../AuthContext'
 import styles from './LoginPage.module.css'
-import { apiClient } from '../lib/apiClient'
-import type { User } from '../AuthContext'
-import { ErrorMessage } from '../components/ErrorMessage/ErrorMessage'
+import { apiClient } from '../../lib/apiClient'
+import type { User } from '../../AuthContext'
+import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -79,6 +79,13 @@ export function LoginPage() {
                   {showPassword ? '🙈' : '👁'}
                 </button>
               </div>
+
+              <p style={{ textAlign: 'right', marginTop: '8px', marginBottom: 0 }}>
+                <Link to="/forgot-password" style={{ fontSize: '14px', color: '#888780'}}>
+                  Şifremi unuttum
+                </Link>
+              </p>
+
             </div>
 
             {error && <ErrorMessage message={error}/>}

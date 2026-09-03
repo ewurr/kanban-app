@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import styles from './RegisterPage.module.css'
-import { useAuth } from "../AuthContext";
-import { apiClient } from "../lib/apiClient";
-import { ErrorMessage } from "../components/ErrorMessage/ErrorMessage";
+import { useAuth } from "../../AuthContext";
+import { apiClient } from "../../lib/apiClient";
+import { ErrorMessage } from "../../components/ErrorMessage/ErrorMessage";
 
 export function RegisterPage(){
     const [email, setEmail] = useState('')

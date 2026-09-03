@@ -32,7 +32,7 @@ export function TaskCommentsTab({ taskId, workspaceId }: TaskCommentsTabProps) {
   const canModerateComments = currentMembership?.role === 'owner' || currentMembership?.role === 'pm'
 
   const addCommentMutation = useMutation({
-    mutationFn: () => apiClient.post(`/tasks/${taskId}/comments`, { content: newCommentContent }),
+    mutationFn: () => apiClient.post(`/tasks/${taskId}/comments`, { content: newCommentContent.trim() }),
     onSuccess: () => {
       setNewCommentContent('')
       queryClient.invalidateQueries({ queryKey: ['task-comments', taskId] })
@@ -42,7 +42,7 @@ export function TaskCommentsTab({ taskId, workspaceId }: TaskCommentsTabProps) {
 
   const editCommentMutation = useMutation({
     mutationFn: (commentId: number) =>
-      apiClient.put(`/tasks/${taskId}/comments/${commentId}`, { content: editingCommentContent }),
+      apiClient.put(`/tasks/${taskId}/comments/${commentId}`, { content: editingCommentContent.trim() }),
     onSuccess: () => {
       setEditingCommentId(null)
       setEditingCommentContent('')

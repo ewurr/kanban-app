@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../AuthContext'
 import type { Column as ColumnType, Task as TaskType } from '../../types/kanban'
 import styles from './AddTaskModal.module.css'
 import { apiClient } from '../../lib/apiClient'
@@ -122,9 +121,7 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
         <div className={styles.actions}>
           {mutation.isError && <ErrorMessage message={mutation.error.message} />}
           <button
-            onClick={() => {mutation.mutate();
-                            onClose();
-                          }}
+            onClick={() => {mutation.mutate()}}
             disabled={!title.trim() || !columnId || mutation.isPending}
             className={styles.saveButton}
           >

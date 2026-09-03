@@ -5,6 +5,11 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    cache: 
+        pools: 
+            login_throttling.cache:
+                adapter: cache.adapter.filesystem
+
     #esi: true
     #fragments: true
 

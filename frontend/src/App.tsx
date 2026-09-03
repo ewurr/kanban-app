@@ -1,15 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
-import { LoginPage } from './pages/LoginPage'
-import { WorkspacesPage } from './pages/WorkspacesPage'
-import { ProjectsPage } from './pages/ProjectsPage'
-import { BoardsPage } from './pages/BoardsPages'
-import { BoardDetailPage } from './pages/BoardDetailPage'
-import { RegisterPage } from './pages/RegisterPage'
-import { NotFoundPage } from './pages/NotFoundPage'
+import { LoginPage } from './pages/LoginPage/LoginPage'
+import { WorkspacesPage } from './pages/WorkspacePage/WorkspacesPage'
+import { ProjectsPage } from './pages/ProjectPage/ProjectsPage'
+import { BoardsPage } from './pages/BoardsPage/BoardsPages'
+import { BoardDetailPage } from './pages/BoardDetailPage/BoardDetailPage'
+import { RegisterPage } from './pages/RegisterPage/RegisterPage'
+import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
 import { TopBar } from './components/TopBar/TopBar'
-import { ProfilePage } from './pages/ProfilePage'
-import { CalendarPage } from './pages/CalendarPage'
+import { ProfilePage } from './pages/ProfilePage/ProfilePage'
+import { CalendarPage } from './pages/CalendarPage/CalendarPage'
+import { ForgotPasswordPage } from './pages/ForgetPasswordPage/ForgetPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage'
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
         <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+        <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+        <Route path="/reset-password" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
         <Route path="/" element={<ProtectedRoute><WorkspacesPage /></ProtectedRoute>} />
         <Route path="/workspaces/:id" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
         <Route path="/workspaces/:id/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />        <Route path="/projects/:id" element={<ProtectedRoute><BoardsPage /></ProtectedRoute>} />

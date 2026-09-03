@@ -34,7 +34,6 @@ export function TaskDetailModal({ task, workspaceId, boardId, onClose }: TaskDet
   const [activeTab, setActiveTab] = useState<'details' | 'history' | 'comments' | 'checklist'>('details')
 
   return (
-    <div className={styles.tabContent}>
       <div className={`${styles.overlay} animate-fade-in`} onClick={onClose}>
         <div
           className={`${styles.modal} animate-pop-in`}
@@ -74,24 +73,24 @@ export function TaskDetailModal({ task, workspaceId, boardId, onClose }: TaskDet
             </button>
           </div>
 
-          {activeTab === 'details' && (
-            <TaskDetailsTab task={task} workspaceId={workspaceId} boardId={boardId} onClose={onClose} />
-          )}
+          <div className={styles.tabContent}>
+            {activeTab === 'details' && (
+              <TaskDetailsTab task={task} workspaceId={workspaceId} boardId={boardId} onClose={onClose} />
+            )}
 
-          {activeTab === 'checklist' && (
-            <TaskChecklistTab task={task} />
-          )}
+            {activeTab === 'checklist' && (
+              <TaskChecklistTab task={task} />
+            )}
 
-          {activeTab === 'history' && (
-            <TaskHistoryTab taskId={task.id} />
-          )}
+            {activeTab === 'history' && (
+              <TaskHistoryTab taskId={task.id} />
+            )}
 
-          {activeTab === 'comments' && (
-            <TaskCommentsTab taskId={task.id} workspaceId={workspaceId} />
-          )}
+            {activeTab === 'comments' && (
+              <TaskCommentsTab taskId={task.id} workspaceId={workspaceId} />
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  
   )
 }

@@ -191,3 +191,59 @@
     background: rgba(255, 255, 255, 0.1);
   }
 }
+
+@media (max-width: 700px) {
+  .page {
+    padding: 20px 12px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .monthLabel {
+    font-size: 15px;
+    min-width: 100px;
+  }
+
+  .dayCell, .emptyCell {
+    min-height: 70px;
+    padding: 4px;
+  }
+
+  .dayHeader {
+    padding: 6px 2px;
+    font-size: 10px;
+  }
+
+  .taskChip {
+    font-size: 10px;
+    padding: 3px 4px;
+  }
+
+  .dayNumber {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .today .dayNumber {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .dayCell, .emptyCell {
+    min-height: 52px;
+  }
+
+  .taskChip {
+    padding: 2px 3px;
+    gap: 3px;
+  }
+
+  .taskTitle {
+    font-size: 9px;
+  }
+}

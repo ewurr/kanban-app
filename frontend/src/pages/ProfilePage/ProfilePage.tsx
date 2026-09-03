@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth, type User } from '../AuthContext'
+import { useAuth, type User } from '../../AuthContext'
 import styles from './ProfilePage.module.css'
-import { apiClient } from '../lib/apiClient'
-import { ErrorMessage } from '../components/ErrorMessage/ErrorMessage'
+import { apiClient } from '../../lib/apiClient'
+import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage'
 import { useNavigate } from 'react-router-dom'
 
 export function ProfilePage() {

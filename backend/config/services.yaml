@@ -28,3 +28,11 @@ services:
     App\Debug\QueryCounterMiddleware:
         tags:
             - { name: doctrine.middleware, connection: default, priority: 10 }
+
+
+    app.login_rate_limiter:
+        class: Symfony\Component\Security\Http\RateLimiter\DefaultLoginRateLimiter
+        arguments:
+            $globalFactory: '@limiter.ip_login'
+            $localFactory: '@limiter.username_ip_login'
+            $secret: '%kernel.secret%'

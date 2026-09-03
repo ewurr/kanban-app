@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Board;
 use App\Entity\Label;
-use App\Entity\Task;
 use App\Repository\LabelRepository;
 use App\Security\Voter\WorkspaceVoter;
 use Doctrine\ORM\EntityManagerInterface;
@@ -107,53 +106,4 @@ final class LabelController extends AbstractController
         return new JsonResponse(null, 204);
     }
 
-        #[Route('/{id}/labels/{labelId}', name: 'app_task_add_label', methods: ['POST'])]
-    public function addLabel(
-        Task $task,
-        int $labelId,
-        EntityManagerInterface $entityManager,
-        SerializerInterface $serializer
-    ): JsonResponse {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
-
-        $label = $entityManager->getRepository(Label::class)->find($labelId);
-
-        if ($label === null) {
-            return new JsonResponse(['error' => 'Etiket bulunamadı.'], 404);
-        }
-
-        if($label->getBoard()->getId() !== $task->getBoard()->getId()) {
-            return new JsonResponse(['error' => 'Bu etiket bu board\'a ait değil.'], 404);
-        }
-
-        $task->addLabel($label);
-        $entityManager->flush();
-
-        $json = $serializer->serialize($task, 'json', ['groups' => 'task:read']);
-
-        return JsonResponse::fromJsonString($json);
-    }
-
-    #[Route('/{id}/labels/{labelId}', name: 'app_task_remove_label', methods: ['DELETE'])]
-    public function removeLabel (
-        Task $task,
-        int $labelId,
-        EntityManagerInterface $entityManager,
-        SerializerInterface $serializer
-    ): JsonResponse {
-        $this->denyAccessUnlessGranted(WorkspaceVoter::TASK_EDIT, $task);
-
-        $label = $entityManager->getRepository(Label::class)->find($labelId);
-
-        if($label === null){
-            return new JsonResponse(['error' => 'Etiket bulunamadı.'],404);
-        }
-
-        $task->removeLabel($label);
-        $entityManager->flush();
-    
-        $json = $serializer->serialize($task, 'json', ['groups' => 'task:read']);
-
-        return JsonResponse::fromJsonString($json);
-    }
 }

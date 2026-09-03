@@ -268,3 +268,61 @@
     display: none;
   }
 }
+
+@media (max-width: 600px) {
+  .formPanel {
+    padding: 1.25rem;
+  }
+
+  .card {
+    padding: 40px 28px;
+    border-radius: 20px;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+
+  .logo {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .formPanel {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .input {
+    padding: 12px 14px;
+  }
+
+  .submitButton {
+    padding: 14px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+}

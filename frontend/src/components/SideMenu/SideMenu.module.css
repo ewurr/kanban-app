@@ -107,3 +107,9 @@
   background-color: #A8E6CF;
   box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.12);
 }
+
+@media (max-width: 400px) {
+  .panel {
+    width: 85vw;
+  }
+}
