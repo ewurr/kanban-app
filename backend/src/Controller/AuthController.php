@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 
 #[Route('/api')]
 final class AuthController extends AbstractController
@@ -35,7 +36,14 @@ final class AuthController extends AbstractController
         // 1. email zaten kayıtlı mı kontrol
         $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email'] ?? null]);
         if($existingUser !== null){
-            return new JsonResponse(['error' => 'Bu email zaten kayıtlı'], 409);
+            
+        // Kullanıcı zaten var olsa bile enumeration'ı önlemek için 201 ile
+        // aynı generic mesajı dönüyoruz — ama gerçek bir kayıt oluşturmuyoruz,
+        // token da üretmiyoruz. Frontend bu durumda kullanıcıyı login'e yönlendirir.
+            return new JsonResponse([
+                'message' => 'Eğer bu email uygunsa, hesabın oluşturuldu. Giriş yapmayı deneyebilirsin.',
+                'requiresLogin' => true,
+                ], 200);
         }
 
         // 2. şifre uzunluk kontrolü (hash'lenmeden önce, çünkü hash her zaman uzun olur)
@@ -74,174 +82,205 @@ final class AuthController extends AbstractController
 
         $json = $serializer->serialize($user, 'json', ['groups' => 'workspace:read']);
 
-        return new JsonResponse([
-            'token' => $token,
+        $response = new JsonResponse([
             'user' => json_decode($json),
         ], 201);
 
+        $response->headers->setCookie(
+            Cookie::create('BEARER')
+            ->withValue($token)
+            ->withHttpOnly(true)
+            ->withSameSite('lax')
+            ->withPath('/')
+            ->withSecure(false)
+            ->withExpires(time() + 3600) 
+
+        );
+
+        return $response;
+
     }
 
-        #[Route('/me', name: 'app_auth_me', methods:['GET'])]
-        public function me (SerializerInterface $serializer): JsonResponse
-        {
-            $json = $serializer->serialize($this->getUser(), 'json', ['groups' => 'workspace:read']);
+    #[Route('/logout', name: 'app_auth_logout', methods: ['POST'])]
+    public function logout(): JsonResponse
+    {
+        $response = new JsonResponse(['message' => 'Çıkış yapıldı.'], 200);
 
-            return JsonResponse::fromJsonString($json);
+        $response->headers->clearCookie(
+            'BEARER',
+            '/',
+            null,
+            false, // secure
+            true, // httpOnly
+            'lax' //sameSite
+        );
+
+        return $response;
+    }
+
+
+    #[Route('/me', name: 'app_auth_me', methods:['GET'])]
+    public function me (SerializerInterface $serializer): JsonResponse
+    {
+        $json = $serializer->serialize($this->getUser(), 'json', ['groups' => 'workspace:read']);
+
+        return JsonResponse::fromJsonString($json);
+    }
+    
+    #[Route('/me', name: 'app_auth_profile', methods:['PUT'])]
+    public function updateProfile(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator,
+        SerializerInterface $serializer
+    ): JsonResponse{
+        /**@var User $user */
+        $user = $this->getUser();
+
+        $data = json_decode($request->getContent(), true);
+
+        if(isset($data['name'])) {
+            $user->setName($data['name']);
         }
+
+        if(isset($data['surname'])) {
+            $user->setSurname($data['surname']);
+        }
+
+        $errors = $validator->validate($user);
         
-        #[Route('/me', name: 'app_auth_profile', methods:['PUT'])]
-        public function updateProfile(
-            Request $request,
-            EntityManagerInterface $entityManager,
-            ValidatorInterface $validator,
-            SerializerInterface $serializer
-        ): JsonResponse{
-            /**@var User $user */
-            $user = $this->getUser();
-
-            $data = json_decode($request->getContent(), true);
-
-            if(isset($data['name'])) {
-                $user->setName($data['name']);
+        if(count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
             }
 
-            if(isset($data['surname'])) {
-                $user->setSurname($data['surname']);
-            }
-
-            $errors = $validator->validate($user);
-            
-            if(count($errors) > 0) {
-                $errorMessages = [];
-                foreach ($errors as $error) {
-                    $errorMessages[] = $error->getMessage();
-                }
-
-                return new JsonResponse(['errors' => $errorMessages], 400);
-            }
-
-            $entityManager->flush();
-
-            $json = $serializer->serialize($user, 'json', ['groups' => 'workspace:read']);
-
-            return JsonResponse::fromJsonString($json);
+            return new JsonResponse(['errors' => $errorMessages], 400);
         }
 
-        #[Route('/me/password', name: 'app_auth_change_password', methods: ['PUT'])]
-        public function changePassword(
-            Request $request,
-            EntityManagerInterface $entityManager,
-            UserPasswordHasherInterface $passwordHasher
-        ): JsonResponse {
-            /**@var User $user */
-            $user = $this->getUser();
+        $entityManager->flush();
 
-            $data = json_decode($request->getContent(), true);
+        $json = $serializer->serialize($user, 'json', ['groups' => 'workspace:read']);
 
-            $currentPassword = $data['currentPassword'] ?? '';
-            $newPassword = $data['newPassword'] ?? '';
+        return JsonResponse::fromJsonString($json);
+    }
 
-            if(!$passwordHasher->isPasswordValid($user, $currentPassword)) {
-                return new JsonResponse(['error' => 'Mevcut şifre yanlış.'], 400);
-            }
+    #[Route('/me/password', name: 'app_auth_change_password', methods: ['PUT'])]
+    public function changePassword(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): JsonResponse {
+        /**@var User $user */
+        $user = $this->getUser();
 
-            if(strlen($newPassword) < 8) {
-                return new JsonResponse(['error' => 'Yeni şifre en az 8 karakter olmalıdır.'], 400);
-            }
+        $data = json_decode($request->getContent(), true);
 
-            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-            $user->setPassword($hashedPassword);
+        $currentPassword = $data['currentPassword'] ?? '';
+        $newPassword = $data['newPassword'] ?? '';
 
-            $entityManager->flush();
-
-            return new JsonResponse(['message' => 'Şifre başarıyla değiştirildi.'], 200);
+        if(!$passwordHasher->isPasswordValid($user, $currentPassword)) {
+            return new JsonResponse(['error' => 'Mevcut şifre yanlış.'], 400);
         }
 
-        #[Route('/forgot-password', name: 'app_auth_forgot_password', methods: ['POST'])]
-        public function forgotPassword(
-            Request $request,
-            UserRepository $userRepository,
-            PasswordResetTokenService $tokenService,
-            MailerInterface $mailer,
-        ): JsonResponse {
-            $data = json_decode($request->getContent(), true);
-            $email = trim($data['email'] ?? '');
+        if(strlen($newPassword) < 8) {
+            return new JsonResponse(['error' => 'Yeni şifre en az 8 karakter olmalıdır.'], 400);
+        }
 
-            // Her senaryoda döneceğimiz cevap — email'in varlığını sızdırmamak için.
-            $genericResponse = new JsonResponse([
-                'message' => 'Eğer bu email kayıtlıysa, sıfırlama linki gönderildi.'
-            ], 200);
+        $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+        $user->setPassword($hashedPassword);
 
-            // Boş email → aynı cevap, sessizce çık
-            if ($email === '') {
-                return $genericResponse;
-            }
+        $entityManager->flush();
 
-            $user = $userRepository->findOneBy(['email' => $email]);
-            if ($user === null) {
-                // Kullanıcı yok → yine aynı cevap dön, hiçbir şey yapma
-                return $genericResponse;
-            }
+        return new JsonResponse(['message' => 'Şifre başarıyla değiştirildi.'], 200);
+    }
 
-            // Kullanıcı var → token üret ve email at
-            $plainToken = $tokenService->createTokenForUser($user);
-            $resetUrl = "http://localhost:5173/reset-password?token={$plainToken}";
+    #[Route('/forgot-password', name: 'app_auth_forgot_password', methods: ['POST'])]
+    public function forgotPassword(
+        Request $request,
+        UserRepository $userRepository,
+        PasswordResetTokenService $tokenService,
+        MailerInterface $mailer,
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+        $email = trim($data['email'] ?? '');
 
-            $fromAddress = 'kanban' . '@' . 'kanban.local';
+        // Her senaryoda döneceğimiz cevap — email'in varlığını sızdırmamak için.
+        $genericResponse = new JsonResponse([
+            'message' => 'Eğer bu email kayıtlıysa, sıfırlama linki gönderildi.'
+        ], 200);
 
-            $emailMessage = (new Email)
-                ->from($fromAddress)
-                ->to($user->getEmail())
-                ->subject('Şifre Sıfırlama')
-                ->text(
-                    "Merhaba,\n\n" .
-                    "Şifrenizi sıfırlamak için aşağıdaki linke tıklayın:\n\n" .
-                    "{$resetUrl}\n\n" .
-                    "Bu link 1 saat içinde geçerliliğini yitirecektir.\n" .
-                    "Eğer bu talebi siz yapmadıysanız, bu emaili görmezden gelebilirsiniz.\n\n" .
-                    "Kanban App"
-                );
-
-            $mailer->send($emailMessage);
-
+        // Boş email → aynı cevap, sessizce çık
+        if ($email === '') {
             return $genericResponse;
         }
 
-        #[Route('/reset-password', name: 'app_auth_reset_password', methods: ['POST'])]
-        public function resetPassword(
-            Request $request,
-            PasswordResetTokenService $tokenService,
-            UserPasswordHasherInterface $passwordHasher,
-            EntityManagerInterface $entityManager,
-            ): JsonResponse {
-                $data = json_decode($request->getContent(), true);
+        $user = $userRepository->findOneBy(['email' => $email]);
+        if ($user === null) {
+            // Kullanıcı yok → yine aynı cevap dön, hiçbir şey yapma
+            return $genericResponse;
+        }
 
-                $plainToken = trim($data['token'] ?? '');
-                $newPassword = $data['password'] ?? '';
+        // Kullanıcı var → token üret ve email at
+        $plainToken = $tokenService->createTokenForUser($user);
+        $resetUrl = "http://localhost:5173/reset-password?token={$plainToken}";
 
-                // 1. Tokeni doğrula: hashle -> DB de ara -> süresini kontrol et
-                $resetToken = $tokenService->validateToken($plainToken);
+        $fromAddress = 'kanban' . '@' . 'kanban.local';
 
-                if($resetToken === null){
-                    return new JsonResponse(['error' => 'Geçersiz veya süresi dolmuş token.'], 400);
-                }
+        $emailMessage = (new Email)
+            ->from($fromAddress)
+            ->to($user->getEmail())
+            ->subject('Şifre Sıfırlama')
+            ->text(
+                "Merhaba,\n\n" .
+                "Şifrenizi sıfırlamak için aşağıdaki linke tıklayın:\n\n" .
+                "{$resetUrl}\n\n" .
+                "Bu link 1 saat içinde geçerliliğini yitirecektir.\n" .
+                "Eğer bu talebi siz yapmadıysanız, bu emaili görmezden gelebilirsiniz.\n\n" .
+                "Kanban App"
+            );
 
-                // 2. Yeni şifre uzunluğunu kontrol et
-                if(strlen($newPassword) < 8){
-                    return new JsonResponse(['error' => 'Yeni şifre en az 8 karakter olmalıdır.'], 400);
-                }
+        $mailer->send($emailMessage);
 
-                // 3. Tokenin sahibi kullanıcının şifresini güncelle
-                $user = $resetToken->getUser();
-                $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-                $user->setPassword($hashedPassword);
-
-                // 4. Tokeni kullanılmış olarak işaretle 
-                $resetToken->markAsUsed();
-
-                // 5. İki değişikliği (user.password, token.usedAt) DB ye kaydet
-                $entityManager->flush();
-
-                return new JsonResponse(['message' => 'Şifre başarıyla sıfırlandı.'], 200);
-            }
+        return $genericResponse;
     }
+
+    #[Route('/reset-password', name: 'app_auth_reset_password', methods: ['POST'])]
+    public function resetPassword(
+        Request $request,
+        PasswordResetTokenService $tokenService,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $entityManager,
+        ): JsonResponse {
+            $data = json_decode($request->getContent(), true);
+
+            $plainToken = trim($data['token'] ?? '');
+            $newPassword = $data['password'] ?? '';
+
+            // 1. Tokeni doğrula: hashle -> DB de ara -> süresini kontrol et
+            $resetToken = $tokenService->validateToken($plainToken);
+
+            if($resetToken === null){
+                return new JsonResponse(['error' => 'Geçersiz veya süresi dolmuş token.'], 400);
+            }
+
+            // 2. Yeni şifre uzunluğunu kontrol et
+            if(strlen($newPassword) < 8){
+                return new JsonResponse(['error' => 'Yeni şifre en az 8 karakter olmalıdır.'], 400);
+            }
+
+            // 3. Tokenin sahibi kullanıcının şifresini güncelle
+            $user = $resetToken->getUser();
+            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $user->setPassword($hashedPassword);
+
+            // 4. Tokeni kullanılmış olarak işaretle 
+            $resetToken->markAsUsed();
+
+            // 5. İki değişikliği (user.password, token.usedAt) DB ye kaydet
+            $entityManager->flush();
+
+            return new JsonResponse(['message' => 'Şifre başarıyla sıfırlandı.'], 200);
+        }
+
+}

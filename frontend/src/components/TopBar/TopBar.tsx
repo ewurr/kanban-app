@@ -162,7 +162,7 @@ export function TopBar() {
               {currentRoleLabel && <span className={styles.roleBadge}>{currentRoleLabel}</span>}
             </Link>
           )}
-          <button className={styles.logoutButton} onClick={logout}>Çıkış</button>
+          <button className={styles.logoutButton} onClick={() => logout()}>Çıkış</button>
         </div>
       </div>
 

@@ -33,9 +33,9 @@ function App() {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { token } = useAuth()
+  const { user } = useAuth()
 
-  if (!token) {
+  if (!user) {
     return <Navigate to="/login" replace />
   }
 
@@ -50,9 +50,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function GuestRoute({children}: { children: React.ReactNode }){
-  const {token} = useAuth()
+  const { user } = useAuth()
 
-  if (token) {
+  if (user) {
     return <Navigate to = "/" replace />
   }
 

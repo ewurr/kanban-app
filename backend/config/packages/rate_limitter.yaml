@@ -3,12 +3,12 @@ framework:
         username_ip_login:
             policy: 'fixed_window'
             limit: 5
-            interval: '15 minutes'
+            interval: '1 minutes'
             cache_pool: 'login_throttling.cache'
         ip_login:
             policy: 'fixed_window'
             limit: 25
-            interval: '15 minutes'
+            interval: '1 minutes'
             cache_pool: 'login_throttling.cache'
 
     cache:

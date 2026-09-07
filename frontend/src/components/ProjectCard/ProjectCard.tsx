@@ -60,7 +60,7 @@ export function ProjectCard({ id, name, description, isOwner, animationDelay }: 
                 <div className={styles.tab} />
                 <div className={styles.body}>
                 <h3 className={styles.name}>
-                    {name.length > 20 ? `${name.slice(0, 30)}...` : name}
+                    {name.length > 20 ? `${name.slice(0, 20)}...` : name}
                 </h3>
                 {description && (
                 <p className={styles.description}>
@@ -73,7 +73,7 @@ export function ProjectCard({ id, name, description, isOwner, animationDelay }: 
                             <button className={styles.editButton} onClick={handleEditStart} title="Düzenle">
                                 ✎
                             </button>
-                            <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending}>
+                            <button className={styles.deleteButton} onClick={handleDelete} disabled={deleteMutation.isPending} title="Sil">
                                 🗑
                             </button>
                         </div>

@@ -17,10 +17,6 @@ export class ApiError extends Error {
     }
 }
 
-function getAuthHeaders(): HeadersInit{
-    const token = localStorage.getItem('token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
-}
 
 async function handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
@@ -50,7 +46,7 @@ export const apiClient = {
     
     get: async <T>(path: string): Promise<T> => {
         const response = await fetch(`${API_BASE_URL}${path}`, {
-            headers: { ...getAuthHeaders() },
+            credentials: 'include',
         })
 
         return handleResponse<T>(response)
@@ -59,9 +55,9 @@ export const apiClient = {
     post: async <T>(path: string, body?: unknown): Promise<T> => {
         const response = await fetch(`${API_BASE_URL}${path}`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                ...getAuthHeaders(),
             },
             body: body !== undefined ? JSON.stringify(body) : undefined,
         })
@@ -71,9 +67,9 @@ export const apiClient = {
     put: async <T>(path: string, body?: unknown): Promise<T> => {
         const response = await fetch(`${API_BASE_URL}${path}`, {
             method: 'PUT',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                ...getAuthHeaders(),
             },
             body: body !== undefined ? JSON.stringify(body) : undefined,
         })
@@ -83,9 +79,9 @@ export const apiClient = {
     patch: async <T>(path: string, body?: unknown): Promise<T> => {
         const response = await fetch(`${API_BASE_URL}${path}`, {
             method: 'PATCH',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                ...getAuthHeaders(),
             },
             body: body !== undefined ? JSON.stringify(body) : undefined,
         })
@@ -95,7 +91,8 @@ export const apiClient = {
     delete: async <T>(path: string): Promise<T> => {
         const response = await fetch(`${API_BASE_URL}${path}`, {
             method: 'DELETE',
-            headers: { ...getAuthHeaders() },
+            credentials: 'include',
+            
         })
         return handleResponse<T>(response)
     },

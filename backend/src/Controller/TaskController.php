@@ -123,7 +123,12 @@ final class TaskController extends AbstractController
         $task->setColor($data['color'] ?? '#FFD93D'); 
 
         if(isset($data['dueDate'])){
-            $task->setDueDate(new \DateTimeImmutable($data['dueDate']));
+            try {
+                $task->setDueDate(new \DateTimeImmutable($data['dueDate']));
+
+            } catch (\Exception) {
+                return new JsonResponse(['error' => 'Geçersiz tarih formatı.'], 400);
+            }
         }
 
         $errors = $validator->validate($task);
@@ -261,7 +266,11 @@ final class TaskController extends AbstractController
         }   
 
         if (isset($data['dueDate'])) {
-            $task->setDueDate(new \DateTimeImmutable($data['dueDate']));
+            try{
+                $task->setDueDate(new \DateTimeImmutable($data['dueDate']));
+            } catch (\Exception) {
+                return new JsonResponse(['error' => 'Geçersiz tarih formatı.'], 400);
+            }
         }
 
         if (isset($data['columnId'])){

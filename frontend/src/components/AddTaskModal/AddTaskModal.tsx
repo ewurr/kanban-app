@@ -61,6 +61,7 @@ export function AddTaskModal({ boardId, columns, tasks, onClose }: AddTaskModalP
 
       onSuccess: () => {
         queryClient.invalidateQueries ({ queryKey: ['tasks']})
+        onClose()
       }
 
   })

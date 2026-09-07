@@ -15,11 +15,11 @@ const COLUMN_ORDER: Record<string, number> = {
   'done': 2,
 }
 
-function getColumnOrder(columnName: string): number {
+export function getColumnOrder(columnName: string): number {
     return COLUMN_ORDER[columnName.toLowerCase()] ?? 3
 }
 
-function getColumnColor(columnName: string): string {
+export function getColumnColor(columnName: string): string {
     const normalized = columnName.toLowerCase()
     if (normalized === 'to do') return '#FF6B6B'
     if (normalized === 'in progress') return '#FFD93D'

@@ -21,13 +21,23 @@ export function RegisterPage(){
         setError(null)
 
         try {
-            const data = await apiClient.post<{ token: string; user: { id: number; email: string; name: string; surname: string } }>(
-                '/register',
-                { email, password, name, surname }
+            const data = await apiClient.post<{
+                    user?: { id: number; email: string; name: string; surname: string } 
+                    requiresLogin?: boolean
+                }>('/register', { email, password, name, surname }
             )
 
-            login(data.token, data.user)
-            navigate('/')
+            if(data.requiresLogin) {
+                //Email zaten kayıtlı olabilir - enumaration önlemek için backend, login sayfasına yönlendiriyoruz
+                navigate('/login')
+                return
+            }
+
+            if(data.user) {
+                login(data.user)
+                navigate('/')
+            }
+
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)
@@ -55,8 +65,9 @@ export function RegisterPage(){
 
                     <form onSubmit={handleSubmit}>
                         <div className={styles.field}>
-                            <label className={styles.label}>E-posta</label>
+                            <label className={styles.label} htmlFor="register-email">E-posta</label>
                             <input
+                                id="register-email"
                                 type="email" 
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -66,9 +77,10 @@ export function RegisterPage(){
                         </div>
 
                         <div className={styles.field}>
-                            <label className={styles.label}>Şifre</label>
+                            <label className={styles.label} htmlFor="register-password">Şifre</label>
                             <div className={styles.passwordWrapper}>
                                 <input
+                                    id="register-password"
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -86,8 +98,9 @@ export function RegisterPage(){
                         </div>
 
                         <div className={styles.field}>
-                            <label className={styles.label}>İsim</label>
+                            <label className={styles.label} htmlFor="register-name">İsim</label>
                             <input  
+                                id="register-name"
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -96,8 +109,9 @@ export function RegisterPage(){
                         </div>
 
                         <div className={styles.field}>
-                            <label className={styles.label}>Soyad</label>
-                            <input  
+                            <label className={styles.label} htmlFor="register-surname">Soyad</label>
+                            <input 
+                                id="register-surname" 
                                 type="text"
                                 value={surname}
                                 onChange={(e) => setSurname(e.target.value)}

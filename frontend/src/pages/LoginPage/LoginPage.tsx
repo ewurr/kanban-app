@@ -25,15 +25,14 @@ export function LoginPage() {
     setError(null)
 
     try {
-      const data = await apiClient.post<{ token: string}> ('/login_check', { email, password })
+      await apiClient.post('/login_check', { email, password })
 
       // login() henüz çağrılmadı, bu yüzden token'ı localStorage'a burada elle yazıyoruz —
       // apiClient bir sonraki çağrıda (`/me`) bu token'ı okuyabilsin diye.
 
-      localStorage.setItem('token', data.token)
       const user = await apiClient.get<User>('/me')    
 
-      login(data.token, user)
+      login(user)
       navigate('/')
       
     } catch (err) {
@@ -51,8 +50,9 @@ export function LoginPage() {
 
           <form onSubmit={handleSubmit}>
             <div className={styles.field}>
-              <label className={styles.label}>Email</label>
+              <label className={styles.label} htmlFor="login-email">Email</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -62,9 +62,10 @@ export function LoginPage() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Şifre</label>
+              <label className={styles.label} htmlFor="login-password">Şifre</label>
               <div className={styles.passwordWrapper}>
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

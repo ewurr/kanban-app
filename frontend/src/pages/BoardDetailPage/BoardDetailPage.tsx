@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -25,11 +25,14 @@ import { TrashCan } from '../../components/TrashCan/TrashCan'
 import { UndoToast } from '../../components/UndoToast/UndoToast'
 import { TaskCard } from '../../components/Task/TaskCard'
 import { ErrorToast } from '../../components/ErrorToast/ErrorToast'
+import { findOriginalTask, reorderColumnTasks, resolveTargetColumnId } from '../../lib/taskHelpers'
 
 export function BoardDetailPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const queryClient = useQueryClient()
+
+  const lastDragOverRef = useRef(0);
 
   const [searchParams] = useSearchParams()
   const activeFilters = searchParams.get('filter')?.split(',').filter(Boolean) ?? []
@@ -99,39 +102,44 @@ export function BoardDetailPage() {
   }
 
   function handleDragOver(event: DragOverEvent) {
-      const { active, over } = event
-      setIsOverTrash(over?.id === 'trash-can')
 
-      if (!over || over.id === 'trash-can') return
+    const { active, over } = event
+    setIsOverTrash(over?.id === 'trash-can')
 
-      const activeId = Number(active.id)
-      const activeTaskData = effectiveTasks.find((t) => t.id === activeId)
-      if (!activeTaskData) return
+    const now = Date.now();
+    if (now - lastDragOverRef.current <  50) return; // 60ms'den kısa aralıklarla tetiklenirse ignore et
+    lastDragOverRef.current = now;
 
-      // Hedef column'u belirle
-      const overId = over.id.toString()
-      let targetColumnId: number
+    if (!over || over.id === 'trash-can') return
 
-      if (overId.startsWith('column-')) {
-          targetColumnId = Number(overId.replace('column-', ''))
-      } else {
-          const overTask = effectiveTasks.find((t) => t.id === Number(over.id))
-          if (!overTask) return
-          targetColumnId = overTask.column.id
-      }
+    const activeId = Number(active.id)
+    const activeTaskData = effectiveTasks.find((t) => t.id === activeId)
+    if (!activeTaskData) return
 
-      // Zaten doğru column'daysa bir şey yapma (gereksiz re-render'ı önle)
-      if (activeTaskData.column.id === targetColumnId) return
+    // Hedef column'u belirle
+    const overId = over.id.toString()
+    let targetColumnId: number
 
-      // Task'ı geçici olarak hedef column'a taşı (sadece görsel önizleme için)
-      setLocalTasks((current) => {
-          const base = current ?? tasks ?? []
-          return base.map((t) =>
-              t.id === activeId
-                  ? { ...t, column: { ...t.column, id: targetColumnId } }
-                  : t
-          )
-      })
+    if (overId.startsWith('column-')) {
+        targetColumnId = Number(overId.replace('column-', ''))
+    } else {
+        const overTask = effectiveTasks.find((t) => t.id === Number(over.id))
+        if (!overTask) return
+        targetColumnId = overTask.column.id
+    }
+
+    // Zaten doğru column'daysa bir şey yapma (gereksiz re-render'ı önle)
+    if (activeTaskData.column.id === targetColumnId) return
+
+    // Task'ı geçici olarak hedef column'a taşı (sadece görsel önizleme için)
+    setLocalTasks((current) => {
+        const base = current ?? tasks ?? []
+        return base.map((t) =>
+            t.id === activeId
+                ? { ...t, column: { ...t.column, id: targetColumnId } }
+                : t
+        )
+    })
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -147,39 +155,28 @@ export function BoardDetailPage() {
 
     // --- Senaryo 1: Trash-can'e bırakıldı ---
     if (over.id === 'trash-can') {
-      handleDropOnTrash(draggedTask)
+      const originalTask = findOriginalTask(tasks, draggedTask, activeTaskId)
+      handleDropOnTrash(originalTask)
       return
     }
 
-    // --- Hedef column'u belirle ---
-    // over.id ya "column-5" gibi bir column ID'si, ya da başka bir task'ın ID'si olabilir
-    const overId = over.id.toString()
-    let targetColumnId: number
+  // --- Hedef column'u belirle ---
+  const overId = over.id.toString()
+  const targetColumnId = resolveTargetColumnId(overId, effectiveTasks)
+  if (targetColumnId === null) return
 
-    if (overId.startsWith('column-')) {
-      targetColumnId = Number(overId.replace('column-', ''))
-    } else {
-      // over bir task ise, o task'ın bulunduğu column'u hedef al
-      const overTask = effectiveTasks.find((t) => t.id === Number(over.id))
-      if (!overTask) return
-      targetColumnId = overTask.column.id
-    }
+  const sourceColumnId = draggedTask.column.id
 
-    const sourceColumnId = draggedTask.column.id
+  // --- Yeni sıralamayı hesapla (optimistic) ---
+  const updated = effectiveTasks.map((t) =>
+    t.id === activeTaskId ? { ...t, column: { ...t.column, id: targetColumnId } } : t
+  )
 
-    // --- Yeni sıralamayı hesapla (optimistic) ---
-    const updated = effectiveTasks.map((t) =>
-      t.id === activeTaskId ? { ...t, column: { ...t.column, id: targetColumnId } } : t
-    )
-
-    // Hedef column'daki task'ları, sürüklenen task'ın over olduğu pozisyona göre yeniden sırala
-    const targetColumnTasks = updated
-      .filter((t) => t.column.id === targetColumnId)
-      .sort((a, b) => {
-        if (a.id === activeTaskId) return 0 // aşağıda düzeltilecek
-        return a.position - b.position
-      })
-
+  const targetColumnTasks = reorderColumnTasks(
+    updated.filter((t) => t.column.id === targetColumnId),
+    activeTaskId,
+    overId
+  )
     // over bir task'sa, sürüklenen task'ı onun yerine koy
     if (!overId.startsWith('column-')) {
       const overTaskIndex = targetColumnTasks.findIndex((t) => t.id === Number(over.id))

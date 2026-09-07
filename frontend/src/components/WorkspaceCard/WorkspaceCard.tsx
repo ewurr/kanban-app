@@ -46,6 +46,7 @@ export function WorkspaceCard({ id, name, memberCount, isOwner, animationDelay }
 
                     {isOwner && (
                         <button
+                            title="Sil"
                             className={styles.deleteButton}
                             onClick={handleDelete}
                             disabled={deleteMutation.isPending}

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { setUnauthorizedHandler } from "./lib/apiClient";
+import { apiClient, setUnauthorizedHandler } from "./lib/apiClient";
 
 export interface User {
     id: number
@@ -9,10 +9,9 @@ export interface User {
 }
 
 interface AuthContextType {
-    token: string | null
     user: User | null
-    login: (token: string, user: User) => void
-    logout: () => void
+    login: (user: User) => void
+    logout: () => Promise<void>
     updateUser: (user: User) => void
 }
 
@@ -20,26 +19,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({children} : {children: ReactNode}){
     
-    const [token, setToken] = useState<string | null> (
-        localStorage.getItem('token')
-    )
-
     const [user, setUser] = useState<User | null>(() => {
         const stored = localStorage.getItem('user')
         return stored ? JSON.parse(stored) : null
     })
 
-    const login = (newToken: string, newUser: User) => {
-        localStorage.setItem('token', newToken)
+    const login = (newUser: User) => {
         localStorage.setItem('user', JSON.stringify(newUser))
-        setToken(newToken)
         setUser(newUser)
     }
 
-    const logout = () => {
-        localStorage.removeItem('token')
+    const logout = async () => {
+        try {
+            await apiClient.post('/logout')
+        } catch {
+            // backende ulaşmasa bile frontend state'ini temizle
+        }
         localStorage.removeItem('user')
-        setToken(null)
         setUser(null)
     }
 
@@ -55,7 +51,7 @@ export function AuthProvider({children} : {children: ReactNode}){
     }
 
     return (
-        <AuthContext.Provider value={{token, user, login, logout, updateUser}}>
+        <AuthContext.Provider value={{user, login, logout, updateUser}}>
             {children}
         </AuthContext.Provider>
     )
